@@ -663,7 +663,7 @@
 <body>
     <div class="progress-bar" id="progressBar"></div>
     <div id="firebaseStatus" class="firebase-status firebase-disconnected">
-        <i class="fas fa-plug"></i> <span>Desconectado do Firebase</span>
+        <i class="fas fa-plug"></i> <span>Conectando ao Firebase...</span>
     </div>
     
     <div class="container">
@@ -863,26 +863,21 @@
                 <button id="photoBtn"><i class="fas fa-camera"></i> Fotos</button>
                 <button id="resetBtn"><i class="fas fa-trash"></i> Limpar</button>
                 <button id="saveBtn"><i class="fas fa-save"></i> Salvar</button>
-                <button id="exportBtn"><i class="fas fa-file-export"></i> Exportar XLSX</button>
-                <button id="exportImagesBtn"><i class="fas fa-images"></i> Exportar Imagens ZIP</button>
+                <button id="exportBtn"><i class="fas fa-file-excel"></i> Exportar XLSX</button>
+                <button id="exportImagesBtn"><i class="fas fa-file-archive"></i> Exportar Imagens ZIP</button>
             </div>
-            
-            <footer>
-                <p>Equilibre Ambiental &copy; 2023 - Todos os direitos reservados</p>
-            </footer>
         </div>
     </div>
 
     <script>
-        // Configuração do Firebase com suas credenciais
+        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELAS SUAS CREDENCIAIS
         const firebaseConfig = {
             apiKey: "AIzaSyAyYleLNapoDWhcLxw-5ZtESNNwVaKlnMA",
             authDomain: "minhas-finan-70d3c.firebaseapp.com",
             projectId: "minhas-finan-70d3c",
             storageBucket: "minhas-finan-70d3c.firebasestorage.app",
             messagingSenderId: "1097470306912",
-            appId: "1:1097470306912:web:9f792d01a443f1fae1b105",
-            measurementId: "G-2VK5RBRSY3"
+            appId: "1:1097470306912:web:9f792d01a443f1fae1b105"
         };
 
         // Inicializar Firebase
@@ -895,7 +890,7 @@
         let formData = {};
         let photoData = {};
 
-        // Dados das perguntas - TODAS as 18 perguntas
+        // Perguntas do formulário
         const questions = [
             {
                 id: "q1",
@@ -904,12 +899,12 @@
                 children: [
                     {
                         id: "q1_1",
-                        text: "A área é coberta, impermeabilizada và protegida contra intempéries e acesso de animais?",
+                        text: "Esta área é coberta e protegida das intempéries?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q1_2",
-                        text: "Existe sinalização clara (placas) identificando os tipos de resíduos e os perigos associados?",
+                        text: "Há sinalização clara indicando a área de resíduos?",
                         type: "sim-nao-nao-verificado"
                     }
                 ]
@@ -917,66 +912,22 @@
             {
                 id: "q2",
                 text: "A empresa realiza a segregação (separação) dos resíduos na fonte (nos pontos de geração)?",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q2_1",
-                        text: "Quais são os tipos de resíduos segregados? (ex.: papel, plástico, metal, vidro, orgânico, reciclável misto, rejeito)",
-                        type: "texto"
-                    },
-                    {
-                        id: "q2_2",
-                        text: "Os coletores (lixeiras) estão devidamente identificados por cores e/ou símbolos?",
-                        type: "sim-nao-nao-verificado"
-                    }
-                ]
+                type: "sim-nao-nao-verificado"
             },
             {
                 id: "q3",
                 text: "Há um sistema de coleta seletiva operando na unidade?",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q3_1",
-                        text: "Qual é a periodicidade da coleta interna (ex.: diária, duas vezes por semana)?",
-                        type: "texto"
-                    },
-                    {
-                        id: "q3_2",
-                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
-                        type: "opcoes",
-                        opcoes: ["Terceirizada", "Prefeitura"]
-                    }
-                ]
+                type: "sim-nao-nao-verificado"
             },
             {
                 id: "q4",
                 text: "Existe pesagem dos resíduos gerados?",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q4_1",
-                        text: "Com que frequência a pesagem é realizada? (ex.: a cada coleta, mensalmente)",
-                        type: "texto"
-                    }
-                ]
+                type: "sim-nao-nao-verificado"
             },
             {
                 id: "q5",
                 text: "Os resíduos orgânicos são gerados em quantidade significativa?",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q5_1",
-                        text: "Qual a destinação atual dos resíduos orgânicos? (ex.: compostagem on-site, doação para ração animal, coleta comum)",
-                        type: "texto"
-                    },
-                    {
-                        id: "q5_2",
-                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
-                        type: "sim-nao-nao-verificado"
-                    }
-                ]
+                type: "sim-nao-nao-verificado"
             },
             {
                 id: "q6",
@@ -985,17 +936,17 @@
                 children: [
                     {
                         id: "q6_1",
-                        text: "Eles são armazenados separadamente dos resíduos comuns e em recipientes específicos?",
+                        text: "Estes resíduos são armazenados separadamente dos demais?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_2",
-                        text: "Existe um fornecedor/licenciado específico para a coleta e destinação final desses materiais?",
+                        text: "A coleta é feita por fornecedor licenciado?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_3",
-                        text: "Existem coletores para pilhas e baterias?",
+                        text: "Existem coletores específicos para pilhas e baterias?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
@@ -1182,67 +1133,90 @@
                 });
         }
 
-        // Sistema de usuários
-        function initializeUsers() {
-            const users = localStorage.getItem('systemUsers');
-            if (!users) {
-                // Criar usuários padrão se não existirem
-                const defaultUsers = {
-                    'admin': {
-                        password: 'admin123',
-                        fullName: 'Administrador',
-                        createdAt: new Date().toISOString()
-                    },
-                    'tecnico1': {
-                        password: 'senha123',
-                        fullName: 'Técnico 1',
-                        createdAt: new Date().toISOString()
-                    },
-                    'tecnico2': {
-                        password: 'senha456',
-                        fullName: 'Técnico 2',
-                        createdAt: new Date().toISOString()
-                    }
-                };
-                localStorage.setItem('systemUsers', JSON.stringify(defaultUsers));
+        // Sistema de usuários com Firebase
+        async function validateUser(username, password) {
+            try {
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    return userData.password === password;
+                }
+                return false;
+            } catch (error) {
+                console.error('Erro ao validar usuário:', error);
+                return false;
             }
         }
 
-        function validateUser(username, password) {
-            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
-            return users[username] && users[username].password === password;
+        async function createUser(username, password, fullName) {
+            try {
+                // Verificar se usuário já existe
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists) {
+                    return { success: false, message: 'Usuário já existe!' };
+                }
+                
+                // Validações
+                if (username.length < 3) {
+                    return { success: false, message: 'Nome de usuário deve ter pelo menos 3 caracteres!' };
+                }
+                
+                if (password.length < 6) {
+                    return { success: false, message: 'Senha deve ter pelo menos 6 caracteres!' };
+                }
+                
+                if (!fullName || fullName.trim().length < 2) {
+                    return { success: false, message: 'Nome completo é obrigatório!' };
+                }
+                
+                // Criar usuário no Firestore
+                await db.collection('users').doc(username).set({
+                    password: password,
+                    fullName: fullName.trim(),
+                    createdAt: new Date().toISOString()
+                });
+                
+                return { success: true, message: 'Usuário criado com sucesso!' };
+            } catch (error) {
+                console.error('Erro ao criar usuário:', error);
+                return { success: false, message: 'Erro ao criar usuário. Tente novamente.' };
+            }
         }
 
-        function createUser(username, password, fullName) {
-            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
-            
-            // Verificar se usuário já existe
-            if (users[username]) {
-                return { success: false, message: 'Usuário já existe!' };
+        async function getUserFullName(username) {
+            try {
+                const userDoc = await db.collection('users').doc(username).get();
+                if (userDoc.exists) {
+                    return userDoc.data().fullName;
+                }
+                return username;
+            } catch (error) {
+                console.error('Erro ao obter nome do usuário:', error);
+                return username;
             }
-            
-            // Validações
-            if (username.length < 3) {
-                return { success: false, message: 'Nome de usuário deve ter pelo menos 3 caracteres!' };
+        }
+
+        // Função para renderizar opções das perguntas
+        function renderOptions(question) {
+            if (question.type === 'sim-nao-nao-verificado') {
+                return `
+                    <div class="option">
+                        <input type="radio" id="${question.id}_sim" name="${question.id}" value="sim">
+                        <label for="${question.id}_sim">Sim</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="${question.id}_nao" name="${question.id}" value="nao">
+                        <label for="${question.id}_nao">Não</label>
+                    </div>
+                    <div class="option">
+                        <input type="radio" id="${question.id}_nao_verificado" name="${question.id}" value="nao-verificado">
+                        <label for="${question.id}_nao_verificado">Não Verificado</label>
+                    </div>
+                `;
+            } else if (question.type === 'texto') {
+                return `<input type="text" name="${question.id}" placeholder="Digite sua resposta...">`;
             }
-            
-            if (password.length < 6) {
-                return { success: false, message: 'Senha deve ter pelo menos 6 caracteres!' };
-            }
-            
-            if (!fullName || fullName.trim().length < 2) {
-                return { success: false, message: 'Nome completo é obrigatório!' };
-            }
-            
-            // Criar usuário
-            users[username] = {
-                password: password,
-                fullName: fullName.trim(),
-                createdAt: new Date().toISOString()
-            };
-            
-            localStorage.setItem('systemUsers', JSON.stringify(users));
-            return { success: true, message: 'Usuário criado com sucesso!' };
+            return '';
         }
 
         // Função para alternar comentários
@@ -1304,6 +1278,292 @@
             if (container.children.length === 0) {
                 container.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
             }
+        }
+
+        // Função para coletar dados do formulário
+        function collectFormData() {
+            const data = {
+                unidade: document.getElementById('unidade').value,
+                data: document.getElementById('data').value,
+                acompanhante: document.getElementById('acompanhante').value,
+                tecnico: document.getElementById('tecnico').value
+            };
+
+            // Coletar respostas das perguntas
+            questions.forEach(question => {
+                const element = document.querySelector(`input[name="${question.id}"]:checked`) || 
+                               document.querySelector(`input[name="${question.id}"]`);
+                if (element) {
+                    data[question.id] = element.value;
+                }
+
+                // Coletar comentários
+                const commentBox = document.getElementById(`comment-${question.id}`);
+                if (commentBox && commentBox.style.display !== 'none') {
+                    const textarea = commentBox.querySelector('textarea');
+                    if (textarea && textarea.value.trim()) {
+                        data[`${question.id}-comentario`] = textarea.value.trim();
+                    }
+                }
+
+                // Coletar respostas das perguntas filhas
+                if (question.children) {
+                    question.children.forEach(child => {
+                        const childElement = document.querySelector(`input[name="${child.id}"]:checked`) || 
+                                           document.querySelector(`input[name="${child.id}"]`);
+                        if (childElement) {
+                            data[child.id] = childElement.value;
+                        }
+
+                        // Coletar comentários das perguntas filhas
+                        const childCommentBox = document.getElementById(`comment-${child.id}`);
+                        if (childCommentBox && childCommentBox.style.display !== 'none') {
+                            const childTextarea = childCommentBox.querySelector('textarea');
+                            if (childTextarea && childTextarea.value.trim()) {
+                                data[`${child.id}-comentario`] = childTextarea.value.trim();
+                            }
+                        }
+                    });
+                }
+            });
+
+            return data;
+        }
+
+        // Função para salvar dados do formulário no Firestore
+        async function saveFormDataToFirestore(unit, formData) {
+            try {
+                const docId = `${currentUser}_${unit}`;
+                await db.collection('visitas_tecnicas').doc(docId).set({
+                    user: currentUser,
+                    unit: unit,
+                    data: formData,
+                    lastUpdated: new Date().toISOString()
+                });
+                return true;
+            } catch (error) {
+                console.error('Erro ao salvar dados no Firestore:', error);
+                return false;
+            }
+        }
+
+        // Função para fazer upload das imagens para o Storage
+        async function uploadImagesToStorage(unit) {
+            const imageUrls = {
+                fachada: [],
+                'coletores-internos': [],
+                'coletores-externos': [],
+                problemas: [],
+                outras: []
+            };
+
+            const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+            
+            for (const category of categories) {
+                const previewContainer = document.getElementById(`preview-${category}`);
+                const images = previewContainer.querySelectorAll('img');
+                
+                for (let i = 0; i < images.length; i++) {
+                    const img = images[i];
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+                    
+                    const fileName = `${currentUser}/${unit}/${category}/${Date.now()}_${i}.jpg`;
+                    const storageRef = storage.ref().child(fileName);
+                    
+                    try {
+                        const snapshot = await storageRef.put(blob);
+                        const downloadURL = await snapshot.ref.getDownloadURL();
+                        imageUrls[category].push(downloadURL);
+                    } catch (error) {
+                        console.error('Erro ao fazer upload da imagem:', error);
+                    }
+                }
+            }
+
+            return imageUrls;
+        }
+
+        // Função para salvar URLs das imagens no Firestore
+        async function saveImageUrlsToFirestore(unit, imageUrls) {
+            try {
+                const docId = `${currentUser}_${unit}`;
+                await db.collection('visitas_imagens').doc(docId).set({
+                    user: currentUser,
+                    unit: unit,
+                    images: imageUrls,
+                    lastUpdated: new Date().toISOString()
+                });
+                return true;
+            } catch (error) {
+                console.error('Erro ao salvar URLs das imagens:', error);
+                return false;
+            }
+        }
+
+        // Função para carregar dados salvos
+        async function loadSavedData(unit) {
+            try {
+                // Carregar dados do formulário
+                const docId = `${currentUser}_${unit}`;
+                const doc = await db.collection('visitas_tecnicas').doc(docId).get();
+                
+                if (doc.exists) {
+                    const savedData = doc.data().data;
+                    
+                    // Preencher campos básicos
+                    document.getElementById('data').value = savedData.data || '';
+                    document.getElementById('acompanhante').value = savedData.acompanhante || '';
+                    document.getElementById('tecnico').value = savedData.tecnico || '';
+                    
+                    // Preencher respostas das perguntas
+                    questions.forEach(question => {
+                        if (savedData[question.id]) {
+                            const element = document.querySelector(`input[name="${question.id}"][value="${savedData[question.id]}"]`) ||
+                                           document.querySelector(`input[name="${question.id}"]`);
+                            if (element) {
+                                if (element.type === 'radio') {
+                                    element.checked = true;
+                                } else {
+                                    element.value = savedData[question.id];
+                                }
+                            }
+                        }
+
+                        // Preencher comentários
+                        if (savedData[`${question.id}-comentario`]) {
+                            const commentBox = document.getElementById(`comment-${question.id}`);
+                            if (commentBox) {
+                                commentBox.style.display = 'block';
+                                const textarea = commentBox.querySelector('textarea');
+                                if (textarea) {
+                                    textarea.value = savedData[`${question.id}-comentario`];
+                                }
+                            }
+                        }
+
+                        // Preencher perguntas filhas
+                        if (question.children) {
+                            question.children.forEach(child => {
+                                if (savedData[child.id]) {
+                                    const childElement = document.querySelector(`input[name="${child.id}"][value="${savedData[child.id]}"]`) ||
+                                                       document.querySelector(`input[name="${child.id}"]`);
+                                    if (childElement) {
+                                        if (childElement.type === 'radio') {
+                                            childElement.checked = true;
+                                        } else {
+                                            childElement.value = savedData[child.id];
+                                        }
+                                    }
+                                }
+
+                                // Preencher comentários das perguntas filhas
+                                if (savedData[`${child.id}-comentario`]) {
+                                    const childCommentBox = document.getElementById(`comment-${child.id}`);
+                                    if (childCommentBox) {
+                                        childCommentBox.style.display = 'block';
+                                        const childTextarea = childCommentBox.querySelector('textarea');
+                                        if (childTextarea) {
+                                            childTextarea.value = savedData[`${child.id}-comentario`];
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Carregar imagens
+                await loadSavedImages(unit);
+            } catch (error) {
+                console.error('Erro ao carregar dados salvos:', error);
+            }
+        }
+
+        // Função para carregar imagens salvas
+        async function loadSavedImages(unit) {
+            try {
+                const docId = `${currentUser}_${unit}`;
+                const doc = await db.collection('visitas_imagens').doc(docId).get();
+                
+                if (doc.exists) {
+                    const imageData = doc.data().images;
+                    const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+                    
+                    for (const category of categories) {
+                        const previewContainer = document.getElementById(`preview-${category}`);
+                        previewContainer.innerHTML = '';
+                        
+                        if (imageData[category] && imageData[category].length > 0) {
+                            imageData[category].forEach(url => {
+                                const photoDiv = document.createElement('div');
+                                photoDiv.className = 'photo-preview';
+                                photoDiv.innerHTML = `
+                                    <img src="${url}" alt="Foto">
+                                    <button class="remove-photo" onclick="removePhoto(this)">×</button>
+                                `;
+                                previewContainer.appendChild(photoDiv);
+                            });
+                        } else {
+                            previewContainer.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao carregar imagens:", error);
+            }
+        }
+
+        // Função para limpar formulário
+        function clearForm() {
+            // Limpar campos básicos
+            document.getElementById('unidade').value = '';
+            document.getElementById('data').value = '';
+            document.getElementById('acompanhante').value = '';
+            document.getElementById('tecnico').value = '';
+            
+            // Limpar todas as respostas
+            const allInputs = document.querySelectorAll('input[type="radio"], input[type="text"], textarea');
+            allInputs.forEach(input => {
+                if (input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Ocultar todas as caixas de comentário
+            const allCommentBoxes = document.querySelectorAll('.comment-box');
+            allCommentBoxes.forEach(box => {
+                box.style.display = 'none';
+            });
+            
+            // Limpar previews de fotos
+            document.querySelectorAll('.multiple-photos').forEach(container => {
+                container.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
+            });
+            
+            // Limpar inputs de arquivo
+            document.querySelectorAll('.photo-input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Ocultar todas as perguntas filhas
+            const allChildren = document.querySelectorAll('.child-questions');
+            const allToggles = document.querySelectorAll('.toggle-children');
+            allChildren.forEach(child => {
+                child.style.display = 'none';
+            });
+            allToggles.forEach(toggle => {
+                toggle.style.display = 'none';
+                toggle.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
+            });
         }
 
         // Função para exportar imagens em ZIP
@@ -1382,149 +1642,83 @@
                     return;
                 }
 
-                // Gerar o arquivo ZIP
-                const content = await zip.generateAsync({type: "blob"});
-                
-                // Criar link para download
+                // Gerar e baixar o ZIP
+                const content = await zip.generateAsync({ type: 'blob' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
                 link.download = `Imagens_SESC_${new Date().toISOString().split('T')[0]}.zip`;
-                document.body.appendChild(link);
                 link.click();
-                document.body.removeChild(link);
                 
                 alert('Arquivo ZIP com imagens gerado com sucesso!');
             } catch (error) {
-                console.error('Erro ao gerar ZIP:', error);
-                alert('Erro ao gerar arquivo ZIP. Tente novamente.');
+                console.error('Erro ao exportar imagens:', error);
+                alert('Erro ao exportar imagens. Tente novamente.');
             }
         }
 
-        // Função para salvar dados no Firestore
-        async function saveFormDataToFirestore(unit, data) {
+        // Função para exportar para XLSX
+        async function exportToXLSX() {
             try {
-                await db.collection('visitas_tecnicas').doc(`${currentUser}_${unit}`).set({
-                    user: currentUser,
-                    unit: unit,
-                    data: data,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log("Dados salvos com sucesso no Firestore!");
-                return true;
-            } catch (error) {
-                console.error("Erro ao salvar no Firestore: ", error);
-                return false;
-            }
-        }
-
-        // Função para carregar dados do Firestore
-        async function loadFormDataFromFirestore(unit) {
-            try {
-                const docRef = db.collection('visitas_tecnicas').doc(`${currentUser}_${unit}`);
-                const doc = await docRef.get();
+                const querySnapshot = await db.collection('visitas_tecnicas')
+                    .where('user', '==', currentUser)
+                    .get();
                 
-                if (doc.exists) {
-                    return doc.data().data;
-                } else {
-                    console.log("Nenhum dado encontrado no Firestore para esta unidade.");
-                    return null;
+                if (querySnapshot.empty) {
+                    alert('Nenhum dado para exportar. Preencha e salve pelo menos um formulário.');
+                    return;
                 }
-            } catch (error) {
-                console.error("Erro ao carregar do Firestore: ", error);
-                return null;
-            }
-        }
-
-        // Função para fazer upload de imagens para o Firebase Storage
-        async function uploadImagesToStorage(unit) {
-            const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
-            const uploadedUrls = {};
-            
-            for (const category of categories) {
-                const previewContainer = document.getElementById(`preview-${category}`);
-                const images = previewContainer.querySelectorAll('img');
-                uploadedUrls[category] = [];
                 
-                for (let i = 0; i < images.length; i++) {
-                    const imgSrc = images[i].src;
-                    if (imgSrc.startsWith('data:image')) {
-                        try {
-                            // Converter data URL para blob
-                            const response = await fetch(imgSrc);
-                            const blob = await response.blob();
-                            
-                            // Criar nome único para o arquivo
-                            const timestamp = new Date().getTime();
-                            const fileName = `${unit}/${category}/${currentUser}_${timestamp}_${i}.jpg`;
-                            
-                            // Fazer upload para o Storage
-                            const storageRef = storage.ref().child(fileName);
-                            const snapshot = await storageRef.put(blob);
-                            
-                            // Obter URL de download
-                            const downloadURL = await snapshot.ref.getDownloadURL();
-                            uploadedUrls[category].push(downloadURL);
-                        } catch (error) {
-                            console.error(`Erro ao fazer upload da imagem ${category}-${i}:`, error);
-                        }
-                    } else if (imgSrc.startsWith('http')) {
-                        // Se já é uma URL (provavelmente já foi feito upload anteriormente)
-                        uploadedUrls[category].push(imgSrc);
-                    }
-                }
-            }
-            
-            return uploadedUrls;
-        }
-
-        // Função para salvar URLs das imagens no Firestore
-        async function saveImageUrlsToFirestore(unit, imageUrls) {
-            try {
-                await db.collection('visitas_imagens').doc(`${currentUser}_${unit}`).set({
-                    user: currentUser,
-                    unit: unit,
-                    images: imageUrls,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log("URLs das imagens salvas com sucesso no Firestore!");
-                return true;
-            } catch (error) {
-                console.error("Erro ao salvar URLs das imagens no Firestore: ", error);
-                return false;
-            }
-        }
-
-        // Função para carregar imagens do Firestore
-        async function loadImagesFromFirestore(unit) {
-            try {
-                const docRef = db.collection('visitas_imagens').doc(`${currentUser}_${unit}`);
-                const doc = await docRef.get();
+                const workbook = XLSX.utils.book_new();
                 
-                if (doc.exists) {
-                    const imageData = doc.data().images;
-                    const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+                // Criar planilha para cada unidade
+                for (const doc of querySnapshot.docs) {
+                    const unitData = doc.data();
+                    const unitName = unitData.unit;
+                    const data = unitData.data;
                     
-                    for (const category of categories) {
-                        const previewContainer = document.getElementById(`preview-${category}`);
-                        previewContainer.innerHTML = '';
+                    const worksheetData = [];
+                    
+                    // Cabeçalho
+                    worksheetData.push(['Campo', 'Resposta', 'Comentário']);
+                    
+                    // Dados básicos
+                    worksheetData.push(['Unidade', unitName, '']);
+                    worksheetData.push(['Data da Visita', data.data || '', '']);
+                    worksheetData.push(['Acompanhante', data.acompanhante || '', '']);
+                    worksheetData.push(['Técnico', data.tecnico || '', '']);
+                    worksheetData.push(['', '', '']); // Linha em branco
+                    
+                    // Perguntas
+                    questions.forEach((question, index) => {
+                        worksheetData.push([`${index + 1}. ${question.text}`, data[question.id] || '', data[`${question.id}-comentario`] || '']);
                         
-                        if (imageData[category] && imageData[category].length > 0) {
-                            imageData[category].forEach(url => {
-                                const photoDiv = document.createElement('div');
-                                photoDiv.className = 'photo-preview';
-                                photoDiv.innerHTML = `
-                                    <img src="${url}" alt="Foto">
-                                    <button class="remove-photo" onclick="removePhoto(this)">×</button>
-                                `;
-                                previewContainer.appendChild(photoDiv);
+                        if (question.children) {
+                            question.children.forEach(child => {
+                                const childNumber = child.id.split('_')[1];
+                                worksheetData.push([`${index + 1}.${childNumber}. ${child.text}`, data[child.id] || '', data[`${child.id}-comentario`] || '']);
                             });
-                        } else {
-                            previewContainer.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
                         }
-                    }
+                    });
+                    
+                    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                    
+                    // Ajustar largura das colunas
+                    const colWidths = [
+                        { wch: 80 }, // Campo
+                        { wch: 20 }, // Resposta
+                        { wch: 40 }  // Comentário
+                    ];
+                    worksheet['!cols'] = colWidths;
+                    
+                    XLSX.utils.book_append_sheet(workbook, worksheet, unitName.replace(/[^\w\s]/gi, '').substring(0, 31));
                 }
+                
+                // Salvar arquivo
+                const fileName = `Formularios_SESC_${new Date().toISOString().split('T')[0]}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
             } catch (error) {
-                console.error("Erro ao carregar imagens:", error);
+                console.error('Erro ao exportar para XLSX:', error);
+                alert('Erro ao exportar dados. Tente novamente.');
             }
         }
 
@@ -1533,14 +1727,11 @@
             // Verificar conexão com Firebase
             checkFirebaseConnection();
             
-            // Inicializar sistema de usuários
-            initializeUsers();
-            
             // Renderizar perguntas
             renderQuestions();
             
             // Event listeners para autenticação
-            document.getElementById('loginBtn').addEventListener('click', function() {
+            document.getElementById('loginBtn').addEventListener('click', async function() {
                 const username = document.getElementById('username').value.trim();
                 const password = document.getElementById('password').value;
                 const errorDiv = document.getElementById('loginError');
@@ -1551,17 +1742,34 @@
                     return;
                 }
                 
-                if (validateUser(username, password)) {
-                    currentUser = username;
-                    showMainContent();
-                    errorDiv.style.display = 'none';
-                } else {
-                    errorDiv.textContent = 'Usuário ou senha incorretos!';
+                // Mostrar indicador de carregamento
+                const loginBtn = document.getElementById('loginBtn');
+                const originalText = loginBtn.innerHTML;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+                loginBtn.disabled = true;
+                
+                try {
+                    const isValid = await validateUser(username, password);
+                    if (isValid) {
+                        currentUser = username;
+                        await showMainContent();
+                        errorDiv.style.display = 'none';
+                    } else {
+                        errorDiv.textContent = 'Usuário ou senha incorretos!';
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Erro no login:', error);
+                    errorDiv.textContent = 'Erro ao fazer login. Tente novamente.';
                     errorDiv.style.display = 'block';
+                } finally {
+                    // Restaurar botão
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
                 }
             });
             
-            document.getElementById('registerBtn').addEventListener('click', function() {
+            document.getElementById('registerBtn').addEventListener('click', async function() {
                 const username = document.getElementById('newUsername').value.trim();
                 const password = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
@@ -1586,25 +1794,41 @@
                     return;
                 }
                 
-                const result = createUser(username, password, fullName);
+                // Mostrar indicador de carregamento
+                const registerBtn = document.getElementById('registerBtn');
+                const originalText = registerBtn.innerHTML;
+                registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+                registerBtn.disabled = true;
                 
-                if (result.success) {
-                    successDiv.textContent = result.message;
-                    successDiv.style.display = 'block';
+                try {
+                    const result = await createUser(username, password, fullName);
                     
-                    // Limpar formulário
-                    document.getElementById('newUsername').value = '';
-                    document.getElementById('newPassword').value = '';
-                    document.getElementById('confirmPassword').value = '';
-                    document.getElementById('fullName').value = '';
-                    
-                    // Voltar para login após 2 segundos
-                    setTimeout(() => {
-                        showLogin();
-                    }, 2000);
-                } else {
-                    errorDiv.textContent = result.message;
+                    if (result.success) {
+                        successDiv.textContent = result.message;
+                        successDiv.style.display = 'block';
+                        
+                        // Limpar formulário
+                        document.getElementById('newUsername').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                        document.getElementById('fullName').value = '';
+                        
+                        // Voltar para login após 2 segundos
+                        setTimeout(() => {
+                            showLogin();
+                        }, 2000);
+                    } else {
+                        errorDiv.textContent = result.message;
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Erro no registro:', error);
+                    errorDiv.textContent = 'Erro ao criar conta. Tente novamente.';
                     errorDiv.style.display = 'block';
+                } finally {
+                    // Restaurar botão
+                    registerBtn.innerHTML = originalText;
+                    registerBtn.disabled = false;
                 }
             });
             
@@ -1739,14 +1963,13 @@
         }
 
         // Função para mostrar a tela principal
-        function showMainContent() {
+        async function showMainContent() {
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('registerContainer').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
             
             // Obter nome completo do usuário
-            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
-            const userFullName = users[currentUser] ? users[currentUser].fullName : currentUser;
+            const userFullName = await getUserFullName(currentUser);
             document.getElementById('userDisplay').textContent = userFullName;
         }
         
@@ -1823,271 +2046,14 @@
                             } else {
                                 toggleButton.style.display = 'none';
                                 childrenContainer.style.display = 'none';
-                                // Limpar respostas das perguntas filhas
-                                question.children.forEach(child => {
-                                    const childOptions = document.querySelectorAll(`input[name="${child.id}"]`);
-                                    childOptions.forEach(opt => {
-                                        if (opt.type === 'radio' || opt.type === 'checkbox') {
-                                            opt.checked = false;
-                                        } else {
-                                            opt.value = '';
-                                        }
-                                    });
-                                    document.querySelector(`#comment-${child.id} textarea`).value = '';
-                                });
+                                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
                             }
                         });
                     });
                 }
             });
-        }
-        
-        // Função para renderizar opções de resposta
-        function renderOptions(question) {
-            switch(question.type) {
-                case 'sim-nao-nao-verificado':
-                    return `
-                        <div class="option">
-                            <input type="radio" id="${question.id}-sim" name="${question.id}" value="sim">
-                            <label for="${question.id}-sim">Sim</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" id="${question.id}-nao" name="${question.id}" value="nao">
-                            <label for="${question.id}-nao">Não</label>
-                        </div>
-                        <div class="option">
-                            <input type="radio" id="${question.id}-nao-verificado" name="${question.id}" value="nao-verificado">
-                            <label for="${question.id}-nao-verificado">Não Verificado</label>
-                        </div>
-                    `;
-                case 'opcoes':
-                    return question.opcoes.map(opcao => `
-                        <div class="option">
-                            <input type="radio" id="${question.id}-${opcao.toLowerCase()}" name="${question.id}" value="${opcao}">
-                            <label for="${question.id}-${opcao.toLowerCase()}">${opcao}</label>
-                        </div>
-                    `).join('');
-                case 'texto':
-                    return `<input type="text" name="${question.id}" placeholder="Digite sua resposta aqui...">`;
-                default:
-                    return '';
-            }
-        }
-        
-        // Função para coletar dados do formulário
-        function collectFormData() {
-            const data = {
-                data: document.getElementById('data').value,
-                acompanhante: document.getElementById('acompanhante').value,
-                tecnico: document.getElementById('tecnico').value
-            };
-            
-            // Coletar respostas das perguntas
-            questions.forEach(question => {
-                // Resposta da pergunta principal
-                if (question.type === 'sim-nao-nao-verificado' || question.type === 'opcoes') {
-                    const selected = document.querySelector(`input[name="${question.id}"]:checked`);
-                    data[question.id] = selected ? selected.value : '';
-                } else {
-                    const inputElement = document.querySelector(`input[name="${question.id}"]`);
-                    data[question.id] = inputElement ? inputElement.value : '';
-                }
-                
-                // Comentário da pergunta principal
-                const commentElement = document.querySelector(`#comment-${question.id} textarea`);
-                data[`${question.id}-comentario`] = commentElement ? commentElement.value : '';
-                
-                // Perguntas filhas
-                if (question.children) {
-                    question.children.forEach(child => {
-                        if (child.type === 'sim-nao-nao-verificado' || child.type === 'opcoes') {
-                            const selected = document.querySelector(`input[name="${child.id}"]:checked`);
-                            data[child.id] = selected ? selected.value : '';
-                        } else {
-                            const childInputElement = document.querySelector(`input[name="${child.id}"]`);
-                            data[child.id] = childInputElement ? childInputElement.value : '';
-                        }
-                        
-                        // Comentário da pergunta filha
-                        const childCommentElement = document.querySelector(`#comment-${child.id} textarea`);
-                        data[`${child.id}-comentario`] = childCommentElement ? childCommentElement.value : '';
-                    });
-                }
-            });
-            
-            return data;
-        }
-        
-        // Função para carregar dados salvos de uma unidade específica
-        async function loadSavedData(unit) {
-            try {
-                const data = await loadFormDataFromFirestore(unit);
-                if (!data) {
-                    clearForm();
-                    return;
-                }
-                
-                // Preencher campos básicos
-                document.getElementById('data').value = data.data || '';
-                document.getElementById('acompanhante').value = data.acompanhante || '';
-                document.getElementById('tecnico').value = data.tecnico || '';
-                
-                // Preencher perguntas
-                questions.forEach(question => {
-                    // Preencher pergunta principal
-                    if (data[question.id]) {
-                        if (question.type === 'sim-nao-nao-verificado' || question.type === 'opcoes') {
-                            const radioElement = document.querySelector(`input[name="${question.id}"][value="${data[question.id]}"]`);
-                            if (radioElement) radioElement.checked = true;
-                        } else {
-                            const inputElement = document.querySelector(`input[name="${question.id}"]`);
-                            if (inputElement) inputElement.value = data[question.id];
-                        }
-                    }
-                    
-                    // Preencher comentário da pergunta principal
-                    if (data[`${question.id}-comentario`]) {
-                        const commentElement = document.querySelector(`#comment-${question.id} textarea`);
-                        if (commentElement) commentElement.value = data[`${question.id}-comentario`];
-                    }
-                    
-                    // Mostrar/ocultar perguntas filhas conforme necessário
-                    if (question.children && data[question.id] === 'sim') {
-                        const toggleButton = document.getElementById(`toggle-${question.id}`);
-                        if (toggleButton) toggleButton.style.display = 'block';
-                        
-                        // Preencher perguntas filhas
-                        question.children.forEach(child => {
-                            if (data[child.id]) {
-                                if (child.type === 'sim-nao-nao-verificado' || child.type === 'opcoes') {
-                                    const childRadioElement = document.querySelector(`input[name="${child.id}"][value="${data[child.id]}"]`);
-                                    if (childRadioElement) childRadioElement.checked = true;
-                                } else {
-                                    const childInputElement = document.querySelector(`input[name="${child.id}"]`);
-                                    if (childInputElement) childInputElement.value = data[child.id];
-                                }
-                            }
-                            
-                            // Preencher comentário da pergunta filha
-                            if (data[`${child.id}-comentario`]) {
-                                const childCommentElement = document.querySelector(`#comment-${child.id} textarea`);
-                                if (childCommentElement) childCommentElement.value = data[`${child.id}-comentario`];
-                            }
-                        });
-                    }
-                });
-
-                // Carregar imagens
-                await loadImagesFromFirestore(unit);
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                alert('Erro ao carregar dados salvos. Tente novamente.');
-            }
-        }
-        
-        // Função para limpar o formulário
-        function clearForm() {
-            document.getElementById('data').value = '';
-            document.getElementById('acompanhante').value = '';
-            document.getElementById('tecnico').value = '';
-            
-            // Limpar todas as respostas
-            const allInputs = document.querySelectorAll('input, textarea');
-            allInputs.forEach(input => {
-                if (input.type === 'radio' || input.type === 'checkbox') {
-                    input.checked = false;
-                } else if (input.type !== 'file' && input.id !== 'unidade') {
-                    input.value = '';
-                }
-            });
-            
-            // Limpar previews de fotos
-            document.querySelectorAll('.multiple-photos').forEach(container => {
-                container.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
-            });
-            
-            // Limpar inputs de arquivo
-            document.querySelectorAll('.photo-input').forEach(input => {
-                input.value = '';
-            });
-            
-            // Ocultar todas as perguntas filhas
-            const allChildren = document.querySelectorAll('.child-questions');
-            const allToggles = document.querySelectorAll('.toggle-children');
-            allChildren.forEach(child => {
-                child.style.display = 'none';
-            });
-            allToggles.forEach(toggle => {
-                toggle.style.display = 'none';
-                toggle.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
-            });
-        }
-        
-        // Função para exportar para XLSX
-        async function exportToXLSX() {
-            try {
-                const querySnapshot = await db.collection('visitas_tecnicas')
-                    .where('user', '==', currentUser)
-                    .get();
-                
-                if (querySnapshot.empty) {
-                    alert('Nenhum dado para exportar. Preencha e salve pelo menos um formulário.');
-                    return;
-                }
-                
-                const workbook = XLSX.utils.book_new();
-                
-                // Criar planilha para cada unidade
-                for (const doc of querySnapshot.docs) {
-                    const unitData = doc.data();
-                    const unitName = unitData.unit;
-                    const data = unitData.data;
-                    
-                    const worksheetData = [];
-                    
-                    // Cabeçalho
-                    worksheetData.push(['Campo', 'Resposta', 'Comentário']);
-                    
-                    // Dados básicos
-                    worksheetData.push(['Unidade', unitName, '']);
-                    worksheetData.push(['Data da Visita', data.data || '', '']);
-                    worksheetData.push(['Acompanhante', data.acompanhante || '', '']);
-                    worksheetData.push(['Técnico', data.tecnico || '', '']);
-                    worksheetData.push(['', '', '']); // Linha em branco
-                    
-                    // Perguntas
-                    questions.forEach((question, index) => {
-                        worksheetData.push([`${index + 1}. ${question.text}`, data[question.id] || '', data[`${question.id}-comentario`] || '']);
-                        
-                        if (question.children) {
-                            question.children.forEach(child => {
-                                const childNumber = child.id.split('_')[1];
-                                worksheetData.push([`${index + 1}.${childNumber}. ${child.text}`, data[child.id] || '', data[`${child.id}-comentario`] || '']);
-                            });
-                        }
-                    });
-                    
-                    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-                    
-                    // Ajustar largura das colunas
-                    const colWidths = [
-                        { wch: 80 }, // Campo
-                        { wch: 20 }, // Resposta
-                        { wch: 40 }  // Comentário
-                    ];
-                    worksheet['!cols'] = colWidths;
-                    
-                    XLSX.utils.book_append_sheet(workbook, worksheet, unitName.replace(/[^\w\s]/gi, '').substring(0, 31));
-                }
-                
-                // Salvar arquivo
-                const fileName = `Formularios_SESC_${new Date().toISOString().split('T')[0]}.xlsx`;
-                XLSX.writeFile(workbook, fileName);
-            } catch (error) {
-                console.error('Erro ao exportar para XLSX:', error);
-                alert('Erro ao exportar dados. Tente novamente.');
-            }
         }
     </script>
 </body>
 </html>
+
