@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Visita Técnica - SESC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- SDK do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <style>
+        :root {
+            --color-primary: #2c3e50;
+            --color-secondary: #34495e;
+            --color-accent1: #8ca261;
+            --color-accent2: #9cb576;
+            --color-neutral: #7f8c8d;
+            --color-light: #ecf0f1;
+            --color-dark: #2c3e50;
+            --color-background: #1a2530;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--color-background) 0%, #2c3e50 100%);
+            color: var(--color-light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .login-container, .register-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .register-container {
+            display: none;
+        }
+        
+        .login-form, .register-form {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-form h2, .register-form h2 {
+            margin-bottom: 20px;
+            color: var(--color-accent1);
+        }
+        
+        .auth-switch {
+            margin-top: 20px;
+            color: var(--color-accent1);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+        }
+        
+        .auth-switch:hover {
+            color: var(--color-accent2);
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--color-primary), var(--color-accent1));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            border-bottom: 5px solid var(--color-accent2);
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .user-info span {
+            margin-right: 10px;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            max-width: 250px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .intro {
+            padding: 25px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--color-light);
+            font-size: 1.1rem;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.4s;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(140, 162, 97, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        select option {
+            background: var(--color-secondary);
+            color: var(--color-light);
+        }
+        
+        input::placeholder,
+        textarea::placeholder {
+            color: #ffffff !important;
+            opacity: 0.7;
+        }
+        
+        .questions-container {
+            padding: 25px;
+        }
+        
+        .question {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid var(--color-accent1);
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, var(--color-accent1), var(--color-accent2));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .question:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .question:hover::before {
+            opacity: 1;
+        }
+        
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--color-light);
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .option input {
+            width: auto;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .option label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        
+        .child-questions {
+            margin-top: 25px;
+            padding-left: 25px;
+            border-left: 3px solid var(--color-accent2);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .toggle-children {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-children:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .comment-section {
+            margin-top: 20px;
+        }
+        
+        .comment-toggle {
+            display: flex;
+            align-items: center;
+            color: var(--color-accent1);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .comment-toggle:hover {
+            color: var(--color-accent2);
+        }
+        
+        .comment-toggle i {
+            margin-right: 8px;
+        }
+        
+        .comment-box {
+            display: none;
+            animation: slideDown 0.4s ease;
+        }
+        
+        .photo-section {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        .photo-requirements {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .photo-requirements h3 {
+            margin-bottom: 15px;
+            color: var(--color-accent1);
+        }
+        
+        .photo-requirements ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        
+        .photo-requirements li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .photo-requirements li::before {
+            content: '📷';
+            margin-right: 10px;
+        }
+        
+        .photo-item {
+            margin-bottom: 20px;
+        }
+        
+        .photo-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-input {
+            display: none;
+        }
+        
+        .photo-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background: linear-gradient(to right, var(--color-accent1), var(--color-accent2));
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .photo-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .camera-button {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .camera-button:hover {
+            background: linear-gradient(to right, #c0392b, #e74c3c);
+        }
+        
+        .multiple-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .multiple-photos .photo-preview {
+            width: 150px;
+            height: 120px;
+            position: relative;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 25px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 10px;
+        }
+        
+        #saveBtn {
+            background: linear-gradient(to right, var(--color-accent1), var(--color-accent2));
+            color: white;
+            flex: 1;
+        }
+        
+        #saveBtn:hover {
+            background: linear-gradient(to right, var(--color-accent2), var(--color-accent1));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #resetBtn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-light);
+        }
+        
+        #resetBtn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        #photoBtn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+        
+        #photoBtn:hover {
+            background: linear-gradient(to right, #2980b9, #3498db);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #exportBtn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        #exportBtn:hover {
+            background: linear-gradient(to right, #8e44ad, #9b59b6);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #exportImagesBtn {
+            background: linear-gradient(to right, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        #exportImagesBtn:hover {
+            background: linear-gradient(to right, #e67e22, #f39c12);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #loginBtn, #registerBtn {
+            background: linear-gradient(to right, var(--color-accent1), var(--color-accent2));
+            color: white;
+            width: 100%;
+        }
+        
+        #loginBtn:hover, #registerBtn:hover {
+            background: linear-gradient(to right, var(--color-accent2), var(--color-accent1));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #logoutBtn {
+            background: rgba(231, 76, 60, 0.8);
+            color: white;
+        }
+        
+        #logoutBtn:hover {
+            background: rgba(231, 76, 60, 1);
+            transform: translateY(-3px);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--color-light);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background: linear-gradient(to right, var(--color-accent1), var(--color-accent2));
+            width: 0%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: width 0.5s ease;
+        }
+        
+        .main-content {
+            display: none;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .firebase-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .firebase-connected {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .firebase-disconnected {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .question {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .child-questions {
+                padding-left: 15px;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 14px;
+                width: 100%;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .photo-preview {
+                max-width: 100%;
+            }
+            
+            .user-info {
+                position: relative;
+                margin-bottom: 15px;
+                justify-content: center;
+            }
+            
+            .firebase-status {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <div id="firebaseStatus" class="firebase-status firebase-disconnected">
+        <i class="fas fa-plug"></i> <span>Desconectado do Firebase</span>
+    </div>
+    
+    <div class="container">
+        <!-- Tela de Login -->
+        <div class="login-container" id="loginContainer">
+            <div class="logo-container">
+                <img src="https://www.equilibreambiental.com/wp-content/uploads/2022/12/Logo-Equilibre.png" alt="Logo Equilibre Ambiental" class="logo">
+            </div>
+            <div class="login-form">
+                <h2>Login do Técnico</h2>
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" placeholder="Digite seu usuário">
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="Digite sua senha">
+                </div>
+                <div class="error-message" id="loginError">Usuário ou senha incorretos!</div>
+                <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <div class="auth-switch" id="showRegister">Não tem conta? Criar nova conta</div>
+            </div>
+        </div>
+        
+        <!-- Tela de Registro -->
+        <div class="register-container" id="registerContainer">
+            <div class="logo-container">
+                <img src="https://www.equilibreambiental.com/wp-content/uploads/2022/12/Logo-Equilibre.png" alt="Logo Equilibre Ambiental" class="logo">
+            </div>
+            <div class="register-form">
+                <h2>Criar Nova Conta</h2>
+                <div class="form-group">
+                    <label for="newUsername">Usuário</label>
+                    <input type="text" id="newUsername" placeholder="Digite o nome de usuário">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Senha</label>
+                    <input type="password" id="newPassword" placeholder="Digite a senha">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Senha</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirme a senha">
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Nome Completo</label>
+                    <input type="text" id="fullName" placeholder="Digite seu nome completo">
+                </div>
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess">Conta criada com sucesso! Faça login para continuar.</div>
+                <button id="registerBtn"><i class="fas fa-user-plus"></i> Criar Conta</button>
+                <div class="auth-switch" id="showLogin">Já tem conta? Fazer login</div>
+            </div>
+        </div>
+        
+        <div class="main-content" id="mainContent">
+            <header>
+                <div class="user-info">
+                    <span id="userDisplay">Usuário</span>
+                    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+                <div class="logo-container">
+                    <img src="https://www.equilibreambiental.com/wp-content/uploads/2022/12/Logo-Equilibre.png" alt="Logo Equilibre Ambiental" class="logo">
+                </div>
+                <h1>Formulário de Visita Técnica</h1>
+                <p class="subtitle">Preenchimento in loco - Unidades SESC</p>
+            </header>
+            
+            <section class="intro">
+                <div class="form-group">
+                    <label for="unidade"><i class="fas fa-building"></i> Unidade do SESC *</label>
+                    <select id="unidade" required>
+                        <option value="">Selecione a unidade</option>
+                        <option value="SESC - Apucarana">SESC - Apucarana</option>
+                        <option value="SESC - Arapongas">SESC - Arapongas</option>
+                        <option value="SESC - Bela Vista do Paraíso">SESC - Bela Vista do Paraíso</option>
+                        <option value="SESC - Cornélio Procópio">SESC - Cornélio Procópio</option>
+                        <option value="SESC - Cornélio Procópio (Centro Esportivo)">SESC - Cornélio Procópio (Centro Esportivo)</option>
+                        <option value="SESC - Ivaiporã">SESC - Ivaiporã</option>
+                        <option value="SESC - Jacarezinho">SESC - Jacarezinho</option>
+                        <option value="SESC - Londrina (Núcleo de Atendimento)">SESC - Londrina (Núcleo de Atendimento)</option>
+                        <option value="SESC - Londrina (Cadeião)">SESC - Londrina (Cadeião)</option>
+                        <option value="SESC - Londrina (Centro)">SESC - Londrina (Centro)</option>
+                        <option value="SESC - Londrina (Norte)">SESC - Londrina (Norte)</option>
+                        <option value="SESC - Santo Antônio da Platina">SESC - Santo Antônio da Platina</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data"><i class="fas fa-calendar"></i> Data da Visita *</label>
+                    <input type="date" id="data" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="acompanhante"><i class="fas fa-user"></i> Nome do Acompanhante</label>
+                    <input type="text" id="acompanhante" placeholder="Nome do responsável que acompanhou a visita">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tecnico"><i class="fas fa-id-badge"></i> Nome do Técnico *</label>
+                    <input type="text" id="tecnico" placeholder="Seu nome" required>
+                </div>
+            </section>
+            
+            <section class="questions-container" id="questions-container">
+                <!-- As perguntas serão inseridas aqui via JavaScript -->
+            </section>
+            
+            <section class="photo-section" id="photoSection">
+                <div class="photo-requirements">
+                    <h3><i class="fas fa-camera"></i> Registro Fotográfico</h3>
+                    <ul>
+                        <li>Foto da fachada da unidade (obrigatória)</li>
+                        <li>Foto dos coletores principais internos (obrigatória)</li>
+                        <li>Foto dos coletores principais externos (se houver)</li>
+                        <li>Foto de problemas observados, como transbordo, vazamentos, sujeira, pragas (se houver)</li>
+                        <li>Outras fotos relevantes (múltiplas fotos permitidas)</li>
+                    </ul>
+                </div>
+                
+                <div class="form-group photo-item">
+                    <label>Foto da Fachada *</label>
+                    <div>
+                        <label for="foto-fachada" class="photo-label"><i class="fas fa-image"></i> Selecionar Foto</label>
+                        <label for="camera-fachada" class="photo-label camera-button"><i class="fas fa-camera"></i> Tirar Foto</label>
+                    </div>
+                    <div class="multiple-photos" id="preview-fachada">
+                        <div class="photo-preview">
+                            <span>Nenhuma foto selecionada</span>
+                        </div>
+                    </div>
+                    <input type="file" accept="image/*" class="photo-input" id="foto-fachada" multiple>
+                    <input type="file" accept="image/*" class="photo-input" id="camera-fachada" capture="environment" multiple>
+                </div>
+                
+                <div class="form-group photo-item">
+                    <label>Coletores Internos *</label>
+                    <div>
+                        <label for="foto-coletores-internos" class="photo-label"><i class="fas fa-image"></i> Selecionar Foto</label>
+                        <label for="camera-coletores-internos" class="photo-label camera-button"><i class="fas fa-camera"></i> Tirar Foto</label>
+                    </div>
+                    <div class="multiple-photos" id="preview-coletores-internos">
+                        <div class="photo-preview">
+                            <span>Nenhuma foto selecionada</span>
+                        </div>
+                    </div>
+                    <input type="file" accept="image/*" class="photo-input" id="foto-coletores-internos" multiple>
+                    <input type="file" accept="image/*" class="photo-input" id="camera-coletores-internos" capture="environment" multiple>
+                </div>
+                
+                <div class="form-group photo-item">
+                    <label>Coletores Externos</label>
+                    <div>
+                        <label for="foto-coletores-externos" class="photo-label"><i class="fas fa-image"></i> Selecionar Foto</label>
+                        <label for="camera-coletores-externos" class="photo-label camera-button"><i class="fas fa-camera"></i> Tirar Foto</label>
+                    </div>
+                    <div class="multiple-photos" id="preview-coletores-externos">
+                        <div class="photo-preview">
+                            <span>Nenhuma foto selecionada</span>
+                        </div>
+                    </div>
+                    <input type="file" accept="image/*" class="photo-input" id="foto-coletores-externos" multiple>
+                    <input type="file" accept="image/*" class="photo-input" id="camera-coletores-externos" capture="environment" multiple>
+                </div>
+                
+                <div class="form-group photo-item">
+                    <label>Problemas Observados</label>
+                    <div>
+                        <label for="foto-problemas" class="photo-label"><i class="fas fa-image"></i> Selecionar Foto</label>
+                        <label for="camera-problemas" class="photo-label camera-button"><i class="fas fa-camera"></i> Tirar Foto</label>
+                    </div>
+                    <div class="multiple-photos" id="preview-problemas">
+                        <div class="photo-preview">
+                            <span>Nenhuma foto selecionada</span>
+                        </div>
+                    </div>
+                    <input type="file" accept="image/*" class="photo-input" id="foto-problemas" multiple>
+                    <input type="file" accept="image/*" class="photo-input" id="camera-problemas" capture="environment" multiple>
+                </div>
+                
+                <div class="form-group photo-item">
+                    <label>Outras Fotos</label>
+                    <div>
+                        <label for="foto-outras" class="photo-label"><i class="fas fa-image"></i> Selecionar Fotos</label>
+                        <label for="camera-outras" class="photo-label camera-button"><i class="fas fa-camera"></i> Tirar Fotos</label>
+                    </div>
+                    <div class="multiple-photos" id="preview-outras">
+                        <div class="photo-preview">
+                            <span>Nenhuma foto selecionada</span>
+                        </div>
+                    </div>
+                    <input type="file" accept="image/*" class="photo-input" id="foto-outras" multiple>
+                    <input type="file" accept="image/*" class="photo-input" id="camera-outras" capture="environment" multiple>
+                </div>
+            </section>
+            
+            <div class="buttons">
+                <button id="photoBtn"><i class="fas fa-camera"></i> Fotos</button>
+                <button id="resetBtn"><i class="fas fa-trash"></i> Limpar</button>
+                <button id="saveBtn"><i class="fas fa-save"></i> Salvar</button>
+                <button id="exportBtn"><i class="fas fa-file-export"></i> Exportar XLSX</button>
+                <button id="exportImagesBtn"><i class="fas fa-images"></i> Exportar Imagens ZIP</button>
+            </div>
+            
+            <footer>
+                <p>Equilibre Ambiental &copy; 2023 - Todos os direitos reservados</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Firebase com suas credenciais
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyYleLNapoDWhcLxw-5ZtESNNwVaKlnMA",
+            authDomain: "minhas-finan-70d3c.firebaseapp.com",
+            projectId: "minhas-finan-70d3c",
+            storageBucket: "minhas-finan-70d3c.firebasestorage.app",
+            messagingSenderId: "1097470306912",
+            appId: "1:1097470306912:web:9f792d01a443f1fae1b105",
+            measurementId: "G-2VK5RBRSY3"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Variáveis globais
+        let currentUser = '';
+        let formData = {};
+        let photoData = {};
+
+        // Dados das perguntas - TODAS as 18 perguntas
+        const questions = [
+            {
+                id: "q1",
+                text: "Existe uma área específica e identificada para o armazenamento temporário de resíduos (pátio, abrigo, contêineres)?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q1_1",
+                        text: "A área é coberta, impermeabilizada và protegida contra intempéries e acesso de animais?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q1_2",
+                        text: "Existe sinalização clara (placas) identificando os tipos de resíduos e os perigos associados?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q2",
+                text: "A empresa realiza a segregação (separação) dos resíduos na fonte (nos pontos de geração)?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q2_1",
+                        text: "Quais são os tipos de resíduos segregados? (ex.: papel, plástico, metal, vidro, orgânico, reciclável misto, rejeito)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q2_2",
+                        text: "Os coletores (lixeiras) estão devidamente identificados por cores e/ou símbolos?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q3",
+                text: "Há um sistema de coleta seletiva operando na unidade?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q3_1",
+                        text: "Qual é a periodicidade da coleta interna (ex.: diária, duas vezes por semana)?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q3_2",
+                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
+                        type: "opcoes",
+                        opcoes: ["Terceirizada", "Prefeitura"]
+                    }
+                ]
+            },
+            {
+                id: "q4",
+                text: "Existe pesagem dos resíduos gerados?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q4_1",
+                        text: "Com que frequência a pesagem é realizada? (ex.: a cada coleta, mensalmente)",
+                        type: "texto"
+                    }
+                ]
+            },
+            {
+                id: "q5",
+                text: "Os resíduos orgânicos são gerados em quantidade significativa?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q5_1",
+                        text: "Qual a destinação atual dos resíduos orgânicos? (ex.: compostagem on-site, doação para ração animal, coleta comum)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q5_2",
+                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q6",
+                text: "São gerados resíduos perigosos (ex.: pilhas, baterias, lâmpadas fluorescentes, produtos químicos, eletrônicos, óleos)?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q6_1",
+                        text: "Eles são armazenados separadamente dos resíduos comuns e em recipientes específicos?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_2",
+                        text: "Existe um fornecedor/licenciado específico para a coleta e destinação final desses materiais?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_3",
+                        text: "Existem coletores para pilhas e baterias?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_4",
+                        text: "Existem coletores para lâmpadas usadas?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_5",
+                        text: "Existem coletores para óleo de cozinha usado?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_6",
+                        text: "As lixeiras estão em número suficiente para a demanda observada?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q7",
+                text: "Existe documentação que comprove a destinação ambientalmente adequada dos resíduos (ex.: MTR, contrato, recibo)?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q7_1",
+                        text: "Esses documentos estão organizados e disponíveis para consulta?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q7_2",
+                        text: "Com que frequência os fornecedores de coleta emitem estes comprovantes?",
+                        type: "texto"
+                    }
+                ]
+            },
+            {
+                id: "q8",
+                text: "Os coletores/contêineres de resíduos são esvaziados antes de ficarem completamente cheios (\"até a boca\")?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q9",
+                text: "Há um responsável designado pela gestão de resíduos na unidade?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q9_1",
+                        text: "Qual o cargo/função deste responsável?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q9_2",
+                        text: "Qual é o número de funcionários responsável pela gestão/manejo dos resíduos?",
+                        type: "texto"
+                    }
+                ]
+            },
+            {
+                id: "q10",
+                text: "Os colaboradores receberam treinamento ou orientação sobre a segregação correta dos resíduos?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q10_1",
+                        text: "Qual é a periodicidade desses eventos?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q10_2",
+                        text: "Vocês têm o registro acessível desses treinamentos/orientações?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q11",
+                text: "Existe algum tipo de reaproveitamento ou reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q11_1",
+                        text: "Quais materiais são reaproveitados e como?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q11_2",
+                        text: "Há uma política de logística reversa para embalagens ou produtos?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q12",
+                text: "A empresa possui metas ou iniciativas para redução da geração de resíduos?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q12_1",
+                        text: "Quais são essas metas ou iniciativas? (ex.: campanhas de conscientização, eliminação de copos descartáveis)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q12_2",
+                        text: "Houve redução mensurável na geração de resíduos nos últimos 12 meses?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q13",
+                text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q14",
+                text: "São utilizados Equipamentos de Proteção Individual (EPIs) pelos colaboradores que manuseiam os resíduos?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q14_1",
+                        text: "Quais EPIs são fornecidos? (ex.: luvas, botas, óculos, avental)",
+                        type: "texto"
+                    }
+                ]
+            },
+            {
+                id: "q15",
+                text: "Há ocorrência de vetores e pragas (ratos, baratas, moscas) na área de armazenamento?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q16",
+                text: "Há pontos de geração de resíduos que não possuem coletores próximos?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q16_1",
+                        text: "Em quais setores isso ocorre?",
+                        type: "texto"
+                    }
+                ]
+            },
+            {
+                id: "q17",
+                text: "Existem não conformidades ou passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q17_1",
+                        text: "Este passivo já foi remediado?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q18",
+                text: "A empresa possui fornecedores preferenciais que adotam práticas sustentáveis ou de logística reversa?",
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q18_1",
+                        text: "Quem são esses fornecedores e para quais produtos?",
+                        type: "texto"
+                    }
+                ]
+            }
+        ];
+
+        // Verificar conexão com Firebase
+        function checkFirebaseConnection() {
+            const statusElement = document.getElementById('firebaseStatus');
+            
+            db.collection('connection_test').doc('test')
+                .set({ timestamp: new Date() })
+                .then(() => {
+                    statusElement.className = 'firebase-status firebase-connected';
+                    statusElement.innerHTML = '<i class="fas fa-plug"></i> <span>Conectado ao Firebase</span>';
+                })
+                .catch((error) => {
+                    statusElement.className = 'firebase-status firebase-disconnected';
+                    statusElement.innerHTML = '<i class="fas fa-plug"></i> <span>Erro de conexão com Firebase</span>';
+                    console.error('Erro de conexão com Firebase:', error);
+                });
+        }
+
+        // Sistema de usuários
+        function initializeUsers() {
+            const users = localStorage.getItem('systemUsers');
+            if (!users) {
+                // Criar usuários padrão se não existirem
+                const defaultUsers = {
+                    'admin': {
+                        password: 'admin123',
+                        fullName: 'Administrador',
+                        createdAt: new Date().toISOString()
+                    },
+                    'tecnico1': {
+                        password: 'senha123',
+                        fullName: 'Técnico 1',
+                        createdAt: new Date().toISOString()
+                    },
+                    'tecnico2': {
+                        password: 'senha456',
+                        fullName: 'Técnico 2',
+                        createdAt: new Date().toISOString()
+                    }
+                };
+                localStorage.setItem('systemUsers', JSON.stringify(defaultUsers));
+            }
+        }
+
+        function validateUser(username, password) {
+            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
+            return users[username] && users[username].password === password;
+        }
+
+        function createUser(username, password, fullName) {
+            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
+            
+            // Verificar se usuário já existe
+            if (users[username]) {
+                return { success: false, message: 'Usuário já existe!' };
+            }
+            
+            // Validações
+            if (username.length < 3) {
+                return { success: false, message: 'Nome de usuário deve ter pelo menos 3 caracteres!' };
+            }
+            
+            if (password.length < 6) {
+                return { success: false, message: 'Senha deve ter pelo menos 6 caracteres!' };
+            }
+            
+            if (!fullName || fullName.trim().length < 2) {
+                return { success: false, message: 'Nome completo é obrigatório!' };
+            }
+            
+            // Criar usuário
+            users[username] = {
+                password: password,
+                fullName: fullName.trim(),
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('systemUsers', JSON.stringify(users));
+            return { success: true, message: 'Usuário criado com sucesso!' };
+        }
+
+        // Função para alternar comentários
+        function toggleComment(questionId) {
+            const commentBox = document.getElementById(`comment-${questionId}`);
+            if (commentBox.style.display === 'none' || commentBox.style.display === '') {
+                commentBox.style.display = 'block';
+            } else {
+                commentBox.style.display = 'none';
+            }
+        }
+
+        // Função para alternar perguntas filhas
+        function toggleChildren(questionId) {
+            const childrenContainer = document.getElementById(`children-${questionId}`);
+            const toggleButton = document.getElementById(`toggle-${questionId}`);
+            
+            if (childrenContainer.style.display === 'none' || childrenContainer.style.display === '') {
+                childrenContainer.style.display = 'block';
+                toggleButton.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar perguntas específicas';
+            } else {
+                childrenContainer.style.display = 'none';
+                toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
+            }
+        }
+
+        // Função para processar múltiplas fotos
+        function handleMultiplePhotos(inputElement, previewContainer) {
+            const files = inputElement.files;
+            if (files.length === 0) return;
+
+            // Limpar preview anterior se for a primeira foto
+            if (previewContainer.children.length === 1 && previewContainer.children[0].querySelector('span')) {
+                previewContainer.innerHTML = '';
+            }
+
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-preview';
+                    photoDiv.innerHTML = `
+                        <img src="${e.target.result}" alt="Foto">
+                        <button class="remove-photo" onclick="removePhoto(this)">×</button>
+                    `;
+                    previewContainer.appendChild(photoDiv);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Função para remover foto
+        function removePhoto(button) {
+            const photoDiv = button.parentElement;
+            const container = photoDiv.parentElement;
+            photoDiv.remove();
+            
+            // Se não há mais fotos, mostrar mensagem padrão
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
+            }
+        }
+
+        // Função para exportar imagens em ZIP
+        async function exportImagesToZip() {
+            const zip = new JSZip();
+            let hasImages = false;
+
+            try {
+                // Obter todas as unidades que têm dados salvos
+                const querySnapshot = await db.collection('visitas_tecnicas')
+                    .where('user', '==', currentUser)
+                    .get();
+                
+                if (querySnapshot.empty) {
+                    alert('Nenhum dado encontrado para exportar.');
+                    return;
+                }
+
+                for (const doc of querySnapshot.docs) {
+                    const unitData = doc.data();
+                    const unitName = unitData.unit;
+                    
+                    // Obter imagens desta unidade
+                    const imgDoc = await db.collection('visitas_imagens')
+                        .doc(`${currentUser}_${unitName}`)
+                        .get();
+                    
+                    if (!imgDoc.exists) continue;
+
+                    const unitPhotos = imgDoc.data().images;
+                    if (!unitPhotos) continue;
+
+                    // Criar pasta para a unidade
+                    const unitFolder = zip.folder(unitName);
+                    let unitHasImages = false;
+
+                    // Categorias de fotos com nomes padronizados
+                    const photoCategories = {
+                        'fachada': 'Foto da Fachada',
+                        'coletores-internos': 'Coletores Internos',
+                        'coletores-externos': 'Coletores Externos',
+                        'problemas': 'Problemas Observados',
+                        'outras': 'Outras Fotos'
+                    };
+
+                    for (const [category, categoryName] of Object.entries(photoCategories)) {
+                        const photos = unitPhotos[category];
+                        if (photos && photos.length > 0) {
+                            for (let i = 0; i < photos.length; i++) {
+                                try {
+                                    const photoUrl = photos[i];
+                                    const response = await fetch(photoUrl);
+                                    const blob = await response.blob();
+                                    
+                                    // Determinar extensão do arquivo
+                                    const extension = photoUrl.split('.').pop().split('?')[0] || 'jpg';
+                                    
+                                    // Nome do arquivo
+                                    const fileName = photos.length > 1 
+                                        ? `${categoryName}_${i + 1}.${extension}`
+                                        : `${categoryName}.${extension}`;
+                                    
+                                    unitFolder.file(fileName, blob);
+                                    unitHasImages = true;
+                                    hasImages = true;
+                                } catch (error) {
+                                    console.error('Erro ao processar foto:', error);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!hasImages) {
+                    alert('Nenhuma imagem encontrada para exportar.');
+                    return;
+                }
+
+                // Gerar o arquivo ZIP
+                const content = await zip.generateAsync({type: "blob"});
+                
+                // Criar link para download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = `Imagens_SESC_${new Date().toISOString().split('T')[0]}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert('Arquivo ZIP com imagens gerado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao gerar ZIP:', error);
+                alert('Erro ao gerar arquivo ZIP. Tente novamente.');
+            }
+        }
+
+        // Função para salvar dados no Firestore
+        async function saveFormDataToFirestore(unit, data) {
+            try {
+                await db.collection('visitas_tecnicas').doc(`${currentUser}_${unit}`).set({
+                    user: currentUser,
+                    unit: unit,
+                    data: data,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("Dados salvos com sucesso no Firestore!");
+                return true;
+            } catch (error) {
+                console.error("Erro ao salvar no Firestore: ", error);
+                return false;
+            }
+        }
+
+        // Função para carregar dados do Firestore
+        async function loadFormDataFromFirestore(unit) {
+            try {
+                const docRef = db.collection('visitas_tecnicas').doc(`${currentUser}_${unit}`);
+                const doc = await docRef.get();
+                
+                if (doc.exists) {
+                    return doc.data().data;
+                } else {
+                    console.log("Nenhum dado encontrado no Firestore para esta unidade.");
+                    return null;
+                }
+            } catch (error) {
+                console.error("Erro ao carregar do Firestore: ", error);
+                return null;
+            }
+        }
+
+        // Função para fazer upload de imagens para o Firebase Storage
+        async function uploadImagesToStorage(unit) {
+            const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+            const uploadedUrls = {};
+            
+            for (const category of categories) {
+                const previewContainer = document.getElementById(`preview-${category}`);
+                const images = previewContainer.querySelectorAll('img');
+                uploadedUrls[category] = [];
+                
+                for (let i = 0; i < images.length; i++) {
+                    const imgSrc = images[i].src;
+                    if (imgSrc.startsWith('data:image')) {
+                        try {
+                            // Converter data URL para blob
+                            const response = await fetch(imgSrc);
+                            const blob = await response.blob();
+                            
+                            // Criar nome único para o arquivo
+                            const timestamp = new Date().getTime();
+                            const fileName = `${unit}/${category}/${currentUser}_${timestamp}_${i}.jpg`;
+                            
+                            // Fazer upload para o Storage
+                            const storageRef = storage.ref().child(fileName);
+                            const snapshot = await storageRef.put(blob);
+                            
+                            // Obter URL de download
+                            const downloadURL = await snapshot.ref.getDownloadURL();
+                            uploadedUrls[category].push(downloadURL);
+                        } catch (error) {
+                            console.error(`Erro ao fazer upload da imagem ${category}-${i}:`, error);
+                        }
+                    } else if (imgSrc.startsWith('http')) {
+                        // Se já é uma URL (provavelmente já foi feito upload anteriormente)
+                        uploadedUrls[category].push(imgSrc);
+                    }
+                }
+            }
+            
+            return uploadedUrls;
+        }
+
+        // Função para salvar URLs das imagens no Firestore
+        async function saveImageUrlsToFirestore(unit, imageUrls) {
+            try {
+                await db.collection('visitas_imagens').doc(`${currentUser}_${unit}`).set({
+                    user: currentUser,
+                    unit: unit,
+                    images: imageUrls,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("URLs das imagens salvas com sucesso no Firestore!");
+                return true;
+            } catch (error) {
+                console.error("Erro ao salvar URLs das imagens no Firestore: ", error);
+                return false;
+            }
+        }
+
+        // Função para carregar imagens do Firestore
+        async function loadImagesFromFirestore(unit) {
+            try {
+                const docRef = db.collection('visitas_imagens').doc(`${currentUser}_${unit}`);
+                const doc = await docRef.get();
+                
+                if (doc.exists) {
+                    const imageData = doc.data().images;
+                    const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+                    
+                    for (const category of categories) {
+                        const previewContainer = document.getElementById(`preview-${category}`);
+                        previewContainer.innerHTML = '';
+                        
+                        if (imageData[category] && imageData[category].length > 0) {
+                            imageData[category].forEach(url => {
+                                const photoDiv = document.createElement('div');
+                                photoDiv.className = 'photo-preview';
+                                photoDiv.innerHTML = `
+                                    <img src="${url}" alt="Foto">
+                                    <button class="remove-photo" onclick="removePhoto(this)">×</button>
+                                `;
+                                previewContainer.appendChild(photoDiv);
+                            });
+                        } else {
+                            previewContainer.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao carregar imagens:", error);
+            }
+        }
+
+        // Event listeners quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar conexão com Firebase
+            checkFirebaseConnection();
+            
+            // Inicializar sistema de usuários
+            initializeUsers();
+            
+            // Renderizar perguntas
+            renderQuestions();
+            
+            // Event listeners para autenticação
+            document.getElementById('loginBtn').addEventListener('click', function() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const errorDiv = document.getElementById('loginError');
+                
+                if (!username || !password) {
+                    errorDiv.textContent = 'Por favor, preencha todos os campos!';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                if (validateUser(username, password)) {
+                    currentUser = username;
+                    showMainContent();
+                    errorDiv.style.display = 'none';
+                } else {
+                    errorDiv.textContent = 'Usuário ou senha incorretos!';
+                    errorDiv.style.display = 'block';
+                }
+            });
+            
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                const username = document.getElementById('newUsername').value.trim();
+                const password = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const fullName = document.getElementById('fullName').value.trim();
+                const errorDiv = document.getElementById('registerError');
+                const successDiv = document.getElementById('registerSuccess');
+                
+                // Limpar mensagens anteriores
+                errorDiv.style.display = 'none';
+                successDiv.style.display = 'none';
+                
+                // Validações
+                if (!username || !password || !confirmPassword || !fullName) {
+                    errorDiv.textContent = 'Por favor, preencha todos os campos!';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    errorDiv.textContent = 'As senhas não coincidem!';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                const result = createUser(username, password, fullName);
+                
+                if (result.success) {
+                    successDiv.textContent = result.message;
+                    successDiv.style.display = 'block';
+                    
+                    // Limpar formulário
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    document.getElementById('fullName').value = '';
+                    
+                    // Voltar para login após 2 segundos
+                    setTimeout(() => {
+                        showLogin();
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = result.message;
+                    errorDiv.style.display = 'block';
+                }
+            });
+            
+            // Event listeners para alternar entre login e registro
+            document.getElementById('showRegister').addEventListener('click', function() {
+                showRegister();
+            });
+            
+            document.getElementById('showLogin').addEventListener('click', function() {
+                showLogin();
+            });
+            
+            // Event listener para logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                currentUser = '';
+                formData = {};
+                photoData = {};
+                showLogin();
+            });
+            
+            // Event listener para mudança de unidade
+            document.getElementById('unidade').addEventListener('change', function() {
+                const selectedUnit = this.value;
+                if (selectedUnit) {
+                    loadSavedData(selectedUnit);
+                }
+            });
+            
+            // Event listener para botão de fotos
+            document.getElementById('photoBtn').addEventListener('click', function() {
+                const photoSection = document.getElementById('photoSection');
+                if (photoSection.style.display === 'none' || photoSection.style.display === '') {
+                    photoSection.style.display = 'block';
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar Fotos';
+                } else {
+                    photoSection.style.display = 'none';
+                    this.innerHTML = '<i class="fas fa-camera"></i> Fotos';
+                }
+            });
+            
+            // Event listeners para inputs de foto (múltiplas fotos)
+            const photoInputs = document.querySelectorAll('.photo-input');
+            photoInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const category = this.id.replace('foto-', '').replace('camera-', '');
+                    const previewContainer = document.getElementById(`preview-${category}`);
+                    handleMultiplePhotos(this, previewContainer);
+                });
+            });
+            
+            // Botão de salvar
+            document.getElementById('saveBtn').addEventListener('click', async function() {
+                if (!document.getElementById('unidade').value || !document.getElementById('data').value || !document.getElementById('tecnico').value) {
+                    alert('Por favor, preencha pelo menos a unidade, data da visita e nome do técnico.');
+                    return;
+                }
+
+                try {
+                    // Mostrar indicador de progresso
+                    const saveBtn = document.getElementById('saveBtn');
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                    saveBtn.disabled = true;
+
+                    // Salvar dados do formulário
+                    const unit = document.getElementById('unidade').value;
+                    const formData = collectFormData();
+                    
+                    // Salvar no Firestore
+                    const formSaved = await saveFormDataToFirestore(unit, formData);
+                    
+                    if (formSaved) {
+                        // Fazer upload das imagens
+                        const imageUrls = await uploadImagesToStorage(unit);
+                        
+                        // Salvar URLs das imagens no Firestore
+                        await saveImageUrlsToFirestore(unit, imageUrls);
+                        
+                        alert('Dados salvos com sucesso para a unidade ' + unit);
+                    } else {
+                        alert('Erro ao salvar os dados. Verifique o console para mais detalhes.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro ao salvar os dados. Tente novamente.');
+                } finally {
+                    // Restaurar botão
+                    const saveBtn = document.getElementById('saveBtn');
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                }
+            });
+            
+            // Botão de limpar
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja limpar o formulário? Todos os dados não salvos serão perdidos.')) {
+                    clearForm();
+                }
+            });
+            
+            // Botão de exportar XLSX
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                exportToXLSX();
+            });
+            
+            // Botão de exportar imagens ZIP
+            document.getElementById('exportImagesBtn').addEventListener('click', function() {
+                exportImagesToZip();
+            });
+        });
+
+        // Funções de navegação entre telas
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            // Limpar campos
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+        
+        function showRegister() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            // Limpar mensagens
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+
+        // Função para mostrar a tela principal
+        function showMainContent() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // Obter nome completo do usuário
+            const users = JSON.parse(localStorage.getItem('systemUsers') || '{}');
+            const userFullName = users[currentUser] ? users[currentUser].fullName : currentUser;
+            document.getElementById('userDisplay').textContent = userFullName;
+        }
+        
+        // Função para renderizar as perguntas
+        function renderQuestions() {
+            const questionsContainer = document.getElementById('questions-container');
+            questionsContainer.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.className = 'question';
+                questionElement.innerHTML = `
+                    <div class="question-text">${index + 1}. ${question.text}</div>
+                    <div class="options" id="options-${question.id}">
+                        ${renderOptions(question)}
+                    </div>
+                    <div class="comment-section">
+                        <div class="comment-toggle" onclick="toggleComment('${question.id}')">
+                            <i class="fas fa-comment"></i> Adicionar comentário
+                        </div>
+                        <div class="comment-box" id="comment-${question.id}">
+                            <textarea placeholder="Digite seu comentário aqui..." rows="2"></textarea>
+                        </div>
+                    </div>
+                    ${question.children ? `
+                        <div class="toggle-children" id="toggle-${question.id}" onclick="toggleChildren('${question.id}')" style="display: none;">
+                            <i class="fas fa-chevron-down"></i> Mostrar perguntas específicas
+                        </div>
+                        <div class="child-questions" id="children-${question.id}"></div>
+                    ` : ''}
+                `;
+                
+                questionsContainer.appendChild(questionElement);
+                
+                // Renderizar perguntas filhas se existirem
+                if (question.children) {
+                    const childrenContainer = document.getElementById(`children-${question.id}`);
+                    question.children.forEach(child => {
+                        const childElement = document.createElement('div');
+                        childElement.className = 'question';
+                        childElement.innerHTML = `
+                            <div class="question-text">${question.id.replace('q', '')}.${child.id.split('_')[1]}. ${child.text}</div>
+                            <div class="options" id="options-${child.id}">
+                                ${renderOptions(child)}
+                            </div>
+                            <div class="comment-section">
+                                <div class="comment-toggle" onclick="toggleComment('${child.id}')">
+                                    <i class="fas fa-comment"></i> Adicionar comentário
+                                </div>
+                                <div class="comment-box" id="comment-${child.id}">
+                                    <textarea placeholder="Digite seu comentário aqui..." rows="2"></textarea>
+                                </div>
+                            </div>
+                        `;
+                        childrenContainer.appendChild(childElement);
+                    });
+                }
+            });
+
+            // Adicionar event listeners para mostrar/ocultar perguntas filhas
+            questions.forEach(question => {
+                if (question.children) {
+                    const options = document.querySelectorAll(`input[name="${question.id}"]`);
+                    options.forEach(option => {
+                        option.addEventListener('change', function() {
+                            const toggleButton = document.getElementById(`toggle-${question.id}`);
+                            const childrenContainer = document.getElementById(`children-${question.id}`);
+                            if (this.value === 'sim') {
+                                toggleButton.style.display = 'block';
+                                if (childrenContainer.style.display === 'block') {
+                                    childrenContainer.style.display = 'none';
+                                    toggleButton.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
+                                }
+                            } else {
+                                toggleButton.style.display = 'none';
+                                childrenContainer.style.display = 'none';
+                                // Limpar respostas das perguntas filhas
+                                question.children.forEach(child => {
+                                    const childOptions = document.querySelectorAll(`input[name="${child.id}"]`);
+                                    childOptions.forEach(opt => {
+                                        if (opt.type === 'radio' || opt.type === 'checkbox') {
+                                            opt.checked = false;
+                                        } else {
+                                            opt.value = '';
+                                        }
+                                    });
+                                    document.querySelector(`#comment-${child.id} textarea`).value = '';
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        // Função para renderizar opções de resposta
+        function renderOptions(question) {
+            switch(question.type) {
+                case 'sim-nao-nao-verificado':
+                    return `
+                        <div class="option">
+                            <input type="radio" id="${question.id}-sim" name="${question.id}" value="sim">
+                            <label for="${question.id}-sim">Sim</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="${question.id}-nao" name="${question.id}" value="nao">
+                            <label for="${question.id}-nao">Não</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="${question.id}-nao-verificado" name="${question.id}" value="nao-verificado">
+                            <label for="${question.id}-nao-verificado">Não Verificado</label>
+                        </div>
+                    `;
+                case 'opcoes':
+                    return question.opcoes.map(opcao => `
+                        <div class="option">
+                            <input type="radio" id="${question.id}-${opcao.toLowerCase()}" name="${question.id}" value="${opcao}">
+                            <label for="${question.id}-${opcao.toLowerCase()}">${opcao}</label>
+                        </div>
+                    `).join('');
+                case 'texto':
+                    return `<input type="text" name="${question.id}" placeholder="Digite sua resposta aqui...">`;
+                default:
+                    return '';
+            }
+        }
+        
+        // Função para coletar dados do formulário
+        function collectFormData() {
+            const data = {
+                data: document.getElementById('data').value,
+                acompanhante: document.getElementById('acompanhante').value,
+                tecnico: document.getElementById('tecnico').value
+            };
+            
+            // Coletar respostas das perguntas
+            questions.forEach(question => {
+                // Resposta da pergunta principal
+                if (question.type === 'sim-nao-nao-verificado' || question.type === 'opcoes') {
+                    const selected = document.querySelector(`input[name="${question.id}"]:checked`);
+                    data[question.id] = selected ? selected.value : '';
+                } else {
+                    const inputElement = document.querySelector(`input[name="${question.id}"]`);
+                    data[question.id] = inputElement ? inputElement.value : '';
+                }
+                
+                // Comentário da pergunta principal
+                const commentElement = document.querySelector(`#comment-${question.id} textarea`);
+                data[`${question.id}-comentario`] = commentElement ? commentElement.value : '';
+                
+                // Perguntas filhas
+                if (question.children) {
+                    question.children.forEach(child => {
+                        if (child.type === 'sim-nao-nao-verificado' || child.type === 'opcoes') {
+                            const selected = document.querySelector(`input[name="${child.id}"]:checked`);
+                            data[child.id] = selected ? selected.value : '';
+                        } else {
+                            const childInputElement = document.querySelector(`input[name="${child.id}"]`);
+                            data[child.id] = childInputElement ? childInputElement.value : '';
+                        }
+                        
+                        // Comentário da pergunta filha
+                        const childCommentElement = document.querySelector(`#comment-${child.id} textarea`);
+                        data[`${child.id}-comentario`] = childCommentElement ? childCommentElement.value : '';
+                    });
+                }
+            });
+            
+            return data;
+        }
+        
+        // Função para carregar dados salvos de uma unidade específica
+        async function loadSavedData(unit) {
+            try {
+                const data = await loadFormDataFromFirestore(unit);
+                if (!data) {
+                    clearForm();
+                    return;
+                }
+                
+                // Preencher campos básicos
+                document.getElementById('data').value = data.data || '';
+                document.getElementById('acompanhante').value = data.acompanhante || '';
+                document.getElementById('tecnico').value = data.tecnico || '';
+                
+                // Preencher perguntas
+                questions.forEach(question => {
+                    // Preencher pergunta principal
+                    if (data[question.id]) {
+                        if (question.type === 'sim-nao-nao-verificado' || question.type === 'opcoes') {
+                            const radioElement = document.querySelector(`input[name="${question.id}"][value="${data[question.id]}"]`);
+                            if (radioElement) radioElement.checked = true;
+                        } else {
+                            const inputElement = document.querySelector(`input[name="${question.id}"]`);
+                            if (inputElement) inputElement.value = data[question.id];
+                        }
+                    }
+                    
+                    // Preencher comentário da pergunta principal
+                    if (data[`${question.id}-comentario`]) {
+                        const commentElement = document.querySelector(`#comment-${question.id} textarea`);
+                        if (commentElement) commentElement.value = data[`${question.id}-comentario`];
+                    }
+                    
+                    // Mostrar/ocultar perguntas filhas conforme necessário
+                    if (question.children && data[question.id] === 'sim') {
+                        const toggleButton = document.getElementById(`toggle-${question.id}`);
+                        if (toggleButton) toggleButton.style.display = 'block';
+                        
+                        // Preencher perguntas filhas
+                        question.children.forEach(child => {
+                            if (data[child.id]) {
+                                if (child.type === 'sim-nao-nao-verificado' || child.type === 'opcoes') {
+                                    const childRadioElement = document.querySelector(`input[name="${child.id}"][value="${data[child.id]}"]`);
+                                    if (childRadioElement) childRadioElement.checked = true;
+                                } else {
+                                    const childInputElement = document.querySelector(`input[name="${child.id}"]`);
+                                    if (childInputElement) childInputElement.value = data[child.id];
+                                }
+                            }
+                            
+                            // Preencher comentário da pergunta filha
+                            if (data[`${child.id}-comentario`]) {
+                                const childCommentElement = document.querySelector(`#comment-${child.id} textarea`);
+                                if (childCommentElement) childCommentElement.value = data[`${child.id}-comentario`];
+                            }
+                        });
+                    }
+                });
+
+                // Carregar imagens
+                await loadImagesFromFirestore(unit);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados salvos. Tente novamente.');
+            }
+        }
+        
+        // Função para limpar o formulário
+        function clearForm() {
+            document.getElementById('data').value = '';
+            document.getElementById('acompanhante').value = '';
+            document.getElementById('tecnico').value = '';
+            
+            // Limpar todas as respostas
+            const allInputs = document.querySelectorAll('input, textarea');
+            allInputs.forEach(input => {
+                if (input.type === 'radio' || input.type === 'checkbox') {
+                    input.checked = false;
+                } else if (input.type !== 'file' && input.id !== 'unidade') {
+                    input.value = '';
+                }
+            });
+            
+            // Limpar previews de fotos
+            document.querySelectorAll('.multiple-photos').forEach(container => {
+                container.innerHTML = '<div class="photo-preview"><span>Nenhuma foto selecionada</span></div>';
+            });
+            
+            // Limpar inputs de arquivo
+            document.querySelectorAll('.photo-input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Ocultar todas as perguntas filhas
+            const allChildren = document.querySelectorAll('.child-questions');
+            const allToggles = document.querySelectorAll('.toggle-children');
+            allChildren.forEach(child => {
+                child.style.display = 'none';
+            });
+            allToggles.forEach(toggle => {
+                toggle.style.display = 'none';
+                toggle.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar perguntas específicas';
+            });
+        }
+        
+        // Função para exportar para XLSX
+        async function exportToXLSX() {
+            try {
+                const querySnapshot = await db.collection('visitas_tecnicas')
+                    .where('user', '==', currentUser)
+                    .get();
+                
+                if (querySnapshot.empty) {
+                    alert('Nenhum dado para exportar. Preencha e salve pelo menos um formulário.');
+                    return;
+                }
+                
+                const workbook = XLSX.utils.book_new();
+                
+                // Criar planilha para cada unidade
+                for (const doc of querySnapshot.docs) {
+                    const unitData = doc.data();
+                    const unitName = unitData.unit;
+                    const data = unitData.data;
+                    
+                    const worksheetData = [];
+                    
+                    // Cabeçalho
+                    worksheetData.push(['Campo', 'Resposta', 'Comentário']);
+                    
+                    // Dados básicos
+                    worksheetData.push(['Unidade', unitName, '']);
+                    worksheetData.push(['Data da Visita', data.data || '', '']);
+                    worksheetData.push(['Acompanhante', data.acompanhante || '', '']);
+                    worksheetData.push(['Técnico', data.tecnico || '', '']);
+                    worksheetData.push(['', '', '']); // Linha em branco
+                    
+                    // Perguntas
+                    questions.forEach((question, index) => {
+                        worksheetData.push([`${index + 1}. ${question.text}`, data[question.id] || '', data[`${question.id}-comentario`] || '']);
+                        
+                        if (question.children) {
+                            question.children.forEach(child => {
+                                const childNumber = child.id.split('_')[1];
+                                worksheetData.push([`${index + 1}.${childNumber}. ${child.text}`, data[child.id] || '', data[`${child.id}-comentario`] || '']);
+                            });
+                        }
+                    });
+                    
+                    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                    
+                    // Ajustar largura das colunas
+                    const colWidths = [
+                        { wch: 80 }, // Campo
+                        { wch: 20 }, // Resposta
+                        { wch: 40 }  // Comentário
+                    ];
+                    worksheet['!cols'] = colWidths;
+                    
+                    XLSX.utils.book_append_sheet(workbook, worksheet, unitName.replace(/[^\w\s]/gi, '').substring(0, 31));
+                }
+                
+                // Salvar arquivo
+                const fileName = `Formularios_SESC_${new Date().toISOString().split('T')[0]}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+            } catch (error) {
+                console.error('Erro ao exportar para XLSX:', error);
+                alert('Erro ao exportar dados. Tente novamente.');
+            }
+        }
+    </script>
+</body>
+</html>
