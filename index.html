@@ -912,22 +912,65 @@
             {
                 id: "q2",
                 text: "A empresa realiza a segregação (separação) dos resíduos na fonte (nos pontos de geração)?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q2_1",
+                        text: "Quais são os tipos de resíduos segregados? (ex.: papel, plástico, metal, vidro, orgânico, reciclável misto, rejeito)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q2_2",
+                        text: "Os coletores (lixeiras) estão devidamente identificados por cores e/ou símbolos?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q3",
                 text: "Há um sistema de coleta seletiva operando na unidade?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q3_1",
+                        text: "Qual é a periodicidade da coleta interna (ex.: diária, duas vezes por semana)?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q3_2",
+                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q4",
                 text: "Existe pesagem dos resíduos gerados?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q4_1",
+                        text: "Com que frequência a pesagem é realizada? (ex.: a cada coleta, mensalmente)",
+                        type: "texto"
+                    }
+                ]
             },
             {
                 id: "q5",
                 text: "Os resíduos orgânicos são gerados em quantidade significativa?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q5_1",
+                        text: "Qual a destinação atual dos resíduos orgânicos? (ex.: compostagem on-site, doação para ração animal, coleta comum)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q5_2",
+                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q6",
@@ -936,17 +979,38 @@
                 children: [
                     {
                         id: "q6_1",
-                        text: "Estes resíduos são armazenados separadamente dos demais?",
+                        text: "Eles são armazenados separadamente dos resíduos comuns e em recipientes específicos?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_2",
-                        text: "A coleta é feita por fornecedor licenciado?",
+                        text: "Existe um fornecedor/licenciado específico para a coleta e destinação final desses materiais?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_3",
-                        text: "Existem coletores específicos para pilhas e baterias?",
+                        text: "Existem coletores para pilhas e baterias?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_4",
+                        text: "Existem coletores para lâmpadas usadas?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_5",
+                        text: "Existem coletores para óleo de cozinha usado?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_6",
+                        text: "As lixeiras estão em número suficiente para a demanda observada?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q7",
                         type: "sim-nao-nao-verificado"
                     },
                     {
@@ -979,7 +1043,7 @@
                     {
                         id: "q7_2",
                         text: "Com que frequência os fornecedores de coleta emitem estes comprovantes?",
-                        type: "texto"
+                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
@@ -1023,23 +1087,6 @@
                 ]
             },
             {
-                id: "q11",
-                text: "Existe algum tipo de reaproveitamento ou reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q11_1",
-                        text: "Quais materiais são reaproveitados e como?",
-                        type: "texto"
-                    },
-                    {
-                        id: "q11_2",
-                        text: "Há uma política de logística reversa para embalagens ou produtos?",
-                        type: "sim-nao-nao-verificado"
-                    }
-                ]
-            },
-            {
                 id: "q12",
                 text: "A empresa possui metas ou iniciativas para redução da geração de resíduos?",
                 type: "sim-nao-nao-verificado",
@@ -1058,6 +1105,11 @@
             },
             {
                 id: "q13",
+                text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q14",
                 text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
                 type: "sim-nao-nao-verificado"
             },
@@ -1092,6 +1144,10 @@
             },
             {
                 id: "q17",
+                ]
+            },
+            {
+                id: "q17",
                 text: "Existem não conformidades ou passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
                 type: "sim-nao-nao-verificado",
                 children: [
@@ -1106,6 +1162,14 @@
                 id: "q18",
                 text: "A empresa possui fornecedores preferenciais que adotam práticas sustentáveis ou de logística reversa?",
                 type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q18_1",
+                        text: "Quem são esses fornecedores e para quais produtos?",
+                        type: "texto"
+                    }
+                ]
+            }
                 children: [
                     {
                         id: "q18_1",
@@ -2056,4 +2120,3 @@
     </script>
 </body>
 </html>
-
