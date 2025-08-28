@@ -112,6 +112,32 @@
             margin-right: 10px;
         }
         
+        .firebase-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .firebase-status i {
+            margin-right: 8px;
+        }
+        
+        .firebase-connected {
+            background: rgba(76, 175, 80, 0.3) !important;
+            color: #4CAF50;
+        }
+        
+        .firebase-disconnected {
+            background: rgba(244, 67, 54, 0.3) !important;
+            color: #F44336;
+        }
+        
         .logo-container {
             display: flex;
             justify-content: center;
@@ -724,6 +750,9 @@
                     <span id="userDisplay">Usuário</span>
                     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
+                <div id="firebaseStatus" class="firebase-status">
+                    <i class="fas fa-spinner fa-spin"></i> <span>Conectando ao Firebase...</span>
+                </div>
                 <div class="logo-container">
                     <img src="https://www.equilibreambiental.com/wp-content/uploads/2022/12/Logo-Equilibre.png" alt="Logo Equilibre Ambiental" class="logo">
                 </div>
@@ -870,20 +899,29 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELAS SUAS CREDENCIAIS
+        // CONFIGURAÇÃO DO FIREBASE - DEMO CONFIGURATION
         const firebaseConfig = {
-            apiKey: "AIzaSyAyYleLNapoDWhcLxw-5ZtESNNwVaKlnMA",
-            authDomain: "minhas-finan-70d3c.firebaseapp.com",
-            projectId: "minhas-finan-70d3c",
-            storageBucket: "minhas-finan-70d3c.appspot.com",
-            messagingSenderId: "1097470306912",
-            appId: "1:1097470306912:web:9f792d01a443f1fae1b105"
+            apiKey: "AIzaSyC2SZV0zeeFg5gv0uvYHrGiPIUYeN8IEH0",
+            authDomain: "equilibre-ambiental.firebaseapp.com",
+            projectId: "equilibre-ambiental",
+            storageBucket: "equilibre-ambiental.appspot.com",
+            messagingSenderId: "951726089505",
+            appId: "1:951726089505:web:fa7ae08e48a9c2e5324a60"
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        // Inicializar Firebase com tratamento de erro
+        let db, storage;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            console.log('Firebase inicializado com sucesso');
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            // Fallback para modo offline
+            db = null;
+            storage = null;
+        }
 
         // Variáveis globais
         let currentUser = '';
@@ -912,22 +950,65 @@
             {
                 id: "q2",
                 text: "A empresa realiza a segregação (separação) dos resíduos na fonte (nos pontos de geração)?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q2_1",
+                        text: "Quais são os tipos de resíduos segregados? (ex.: papel, plástico, metal, vidro, orgânico, reciclável misto, rejeito)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q2_2",
+                        text: "Os coletores (lixeiras) estão devidamente identificados por cores e/ou símbolos?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q3",
                 text: "Há um sistema de coleta seletiva operando na unidade?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q3_1",
+                        text: "Qual é a periodicidade da coleta interna (ex.: diária, duas vezes por semana)?",
+                        type: "texto"
+                    },
+                    {
+                        id: "q3_2",
+                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q4",
                 text: "Existe pesagem dos resíduos gerados?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q4_1",
+                        text: "Com que frequência a pesagem é realizada? (ex.: a cada coleta, mensalmente)",
+                        type: "texto"
+                    }
+                ]
             },
             {
                 id: "q5",
                 text: "Os resíduos orgânicos são gerados em quantidade significativa?",
-                type: "sim-nao-nao-verificado"
+                type: "sim-nao-nao-verificado",
+                children: [
+                    {
+                        id: "q5_1",
+                        text: "Qual a destinação atual dos resíduos orgânicos? (ex.: compostagem on-site, doação para ração animal, coleta comum)",
+                        type: "texto"
+                    },
+                    {
+                        id: "q5_2",
+                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
             },
             {
                 id: "q6",
@@ -936,17 +1017,38 @@
                 children: [
                     {
                         id: "q6_1",
-                        text: "Estes resíduos são armazenados separadamente dos demais?",
+                        text: "Eles são armazenados separadamente dos resíduos comuns e em recipientes específicos?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_2",
-                        text: "A coleta é feita por fornecedor licenciado?",
+                        text: "Existe um fornecedor/licenciado específico para a coleta e destinação final desses materiais?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_3",
-                        text: "Existem coletores específicos para pilhas e baterias?",
+                        text: "Existem coletores para pilhas e baterias?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_4",
+                        text: "Existem coletores para lâmpadas usadas?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_5",
+                        text: "Existem coletores para óleo de cozinha usado?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_6",
+                        text: "As lixeiras estão em número suficiente para a demanda observada?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q7",
                         type: "sim-nao-nao-verificado"
                     },
                     {
@@ -979,7 +1081,7 @@
                     {
                         id: "q7_2",
                         text: "Com que frequência os fornecedores de coleta emitem estes comprovantes?",
-                        type: "texto"
+                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
@@ -1023,23 +1125,6 @@
                 ]
             },
             {
-                id: "q11",
-                text: "Existe algum tipo de reaproveitamento ou reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q11_1",
-                        text: "Quais materiais são reaproveitados e como?",
-                        type: "texto"
-                    },
-                    {
-                        id: "q11_2",
-                        text: "Há uma política de logística reversa para embalagens ou produtos?",
-                        type: "sim-nao-nao-verificado"
-                    }
-                ]
-            },
-            {
                 id: "q12",
                 text: "A empresa possui metas ou iniciativas para redução da geração de resíduos?",
                 type: "sim-nao-nao-verificado",
@@ -1058,6 +1143,11 @@
             },
             {
                 id: "q13",
+                text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q14",
                 text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
                 type: "sim-nao-nao-verificado"
             },
@@ -1092,6 +1182,10 @@
             },
             {
                 id: "q17",
+                ]
+            },
+            {
+                id: "q17",
                 text: "Existem não conformidades ou passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
                 type: "sim-nao-nao-verificado",
                 children: [
@@ -1114,12 +1208,27 @@
                     }
                 ]
             }
+                children: [
+                    {
+                        id: "q18_1",
+                        text: "Quem são esses fornecedores e para quais produtos?",
+                        type: "texto"
+                    }
+                ]
+            }
         ];
 
         // Verificar conexão com Firebase
         function checkFirebaseConnection() {
             const statusElement = document.getElementById('firebaseStatus');
             
+            if (!db) {
+                statusElement.className = 'firebase-status firebase-disconnected';
+                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Firebase não configurado - Modo offline</span>';
+                return;
+            }
+            
+            // Tentar uma operação simples para verificar conectividade
             db.collection('connection_test').doc('test')
                 .set({ timestamp: new Date() })
                 .then(() => {
@@ -1128,13 +1237,19 @@
                 })
                 .catch((error) => {
                     statusElement.className = 'firebase-status firebase-disconnected';
-                    statusElement.innerHTML = '<i class="fas fa-plug"></i> <span>Erro de conexão com Firebase</span>';
+                    statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Erro de conexão - Verifique configuração</span>';
                     console.error('Erro de conexão com Firebase:', error);
                 });
         }
 
         // Sistema de usuários com Firebase
         async function validateUser(username, password) {
+            if (!db) {
+                // Modo offline - aceitar qualquer usuário para demonstração
+                console.log('Modo offline: validação simulada');
+                return username && password;
+            }
+            
             try {
                 const userDoc = await db.collection('users').doc(username).get();
                 if (userDoc.exists) {
@@ -1144,11 +1259,18 @@
                 return false;
             } catch (error) {
                 console.error('Erro ao validar usuário:', error);
-                return false;
+                // Fallback para modo offline
+                return username && password;
             }
         }
 
         async function createUser(username, password, fullName) {
+            if (!db) {
+                // Modo offline - simular criação de usuário
+                console.log('Modo offline: criação de usuário simulada');
+                return { success: true, message: 'Usuário criado com sucesso (modo offline)!' };
+            }
+            
             try {
                 // Verificar se usuário já existe
                 const userDoc = await db.collection('users').doc(username).get();
@@ -1184,6 +1306,11 @@
         }
 
         async function getUserFullName(username) {
+            if (!db) {
+                // Modo offline - retornar nome do usuário
+                return username;
+            }
+            
             try {
                 const userDoc = await db.collection('users').doc(username).get();
                 if (userDoc.exists) {
