@@ -112,6 +112,32 @@
             margin-right: 10px;
         }
         
+        .firebase-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .firebase-status i {
+            margin-right: 8px;
+        }
+        
+        .firebase-connected {
+            background: rgba(76, 175, 80, 0.3) !important;
+            color: #4CAF50;
+        }
+        
+        .firebase-disconnected {
+            background: rgba(244, 67, 54, 0.3) !important;
+            color: #F44336;
+        }
+        
         .logo-container {
             display: flex;
             justify-content: center;
@@ -724,6 +750,9 @@
                     <span id="userDisplay">Usuário</span>
                     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
+                <div id="firebaseStatus" class="firebase-status">
+                    <i class="fas fa-spinner fa-spin"></i> <span>Conectando ao Firebase...</span>
+                </div>
                 <div class="logo-container">
                     <img src="https://www.equilibreambiental.com/wp-content/uploads/2022/12/Logo-Equilibre.png" alt="Logo Equilibre Ambiental" class="logo">
                 </div>
@@ -863,14 +892,14 @@
                 <button id="photoBtn"><i class="fas fa-camera"></i> Fotos</button>
                 <button id="resetBtn"><i class="fas fa-trash"></i> Limpar</button>
                 <button id="saveBtn"><i class="fas fa-save"></i> Salvar</button>
-                <button id="exportBtn"><i class="fas fa-file-excel"></i> Exportar</button>
-                <button id="exportImagesBtn"><i class="fas fa-images"></i> Exportar Imagens</button>
+                <button id="exportBtn"><i class="fas fa-file-excel"></i> Exportar XLSX</button>
+                <button id="exportImagesBtn"><i class="fas fa-file-archive"></i> Exportar Imagens ZIP</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELAS SUAS CREDENCIAIS
+        // CONFIGURAÇÃO DO FIREBASE - DEMO CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyAyYleLNapoDWhcLxw-5ZtESNNwVaKlnMA",
             authDomain: "minhas-finan-70d3c.firebaseapp.com",
@@ -880,135 +909,151 @@
             appId: "1:1097470306912:web:265637992de81a89e1b105",
         };
 
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        // Inicializar Firebase com tratamento de erro
+        let db, storage;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            console.log('Firebase inicializado com sucesso');
+        } catch (error) {
+            console.error('Erro ao inicializar Firebase:', error);
+            // Fallback para modo offline
+            db = null;
+            storage = null;
+        }
 
         // Variáveis globais
         let currentUser = '';
         let formData = {};
+        let photoData = {};
 
         // Perguntas do formulário
         const questions = [
             {
                 id: "q1",
-                text: "A unidade possui um local específico para armazenamento temporário de resíduos?",
+                text: "Existe uma área específica e identificada para o armazenamento temporário de resíduos (pátio, abrigo, contêineres)?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q1_1",
-                        text: "Este local é coberto e protegido de intempéries?",
+                        text: "Esta área é coberta e protegida das intempéries?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q1_2",
-                        text: "O local possui piso impermeável e sistema de drenagem?",
-                        type: "sim-nao-nao-verificado"
-                    },
-                    {
-                        id: "q1_3",
-                        text: "Há controle de acesso ao local de armazenamento?",
+                        text: "Há sinalização clara indicando a área de resíduos?",
                         type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q2",
-                text: "Os resíduos são segregados na fonte (separados por tipo)?",
+                text: "A empresa realiza a segregação (separação) dos resíduos na fonte (nos pontos de geração)?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q2_1",
-                        text: "Quais tipos de resíduos são segregados? (ex.: papel, plástico, orgânico, eletrônico)",
+                        text: "Quais são os tipos de resíduos segregados? (ex.: papel, plástico, metal, vidro, orgânico, reciclável misto, rejeito)",
                         type: "texto"
                     },
                     {
                         id: "q2_2",
-                        text: "Os coletores estão identificados com cores ou símbolos?",
+                        text: "Os coletores (lixeiras) estão devidamente identificados por cores e/ou símbolos?",
                         type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q3",
-                text: "Existe coleta seletiva na unidade?",
+                text: "Há um sistema de coleta seletiva operando na unidade?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q3_1",
-                        text: "Qual é a frequência da coleta seletiva?",
+                        text: "Qual é a periodicidade da coleta interna (ex.: diária, duas vezes por semana)?",
                         type: "texto"
                     },
                     {
                         id: "q3_2",
-                        text: "Quem é o responsável pela coleta seletiva? (empresa, cooperativa, prefeitura)",
-                        type: "texto"
+                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
+                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q4",
-                text: "A unidade gera resíduos perigosos? (ex.: lâmpadas fluorescentes, pilhas, produtos químicos)",
+                text: "Existe pesagem dos resíduos gerados?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q4_1",
-                        text: "Quais tipos de resíduos perigosos são gerados?",
+                        text: "Com que frequência a pesagem é realizada? (ex.: a cada coleta, mensalmente)",
                         type: "texto"
-                    },
-                    {
-                        id: "q4_2",
-                        text: "Estes resíduos têm destinação específica e adequada?",
-                        type: "sim-nao-nao-verificado"
-                    },
-                    {
-                        id: "q4_3",
-                        text: "Há armazenamento temporário adequado para estes resíduos?",
-                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q5",
-                text: "Os resíduos orgânicos são tratados de forma diferenciada?",
+                text: "Os resíduos orgânicos são gerados em quantidade significativa?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q5_1",
-                        text: "Existe compostagem ou outro tratamento para resíduos orgânicos?",
-                        type: "sim-nao-nao-verificado"
+                        text: "Qual a destinação atual dos resíduos orgânicos? (ex.: compostagem on-site, doação para ração animal, coleta comum)",
+                        type: "texto"
                     },
                     {
                         id: "q5_2",
-                        text: "Os resíduos orgânicos são coletados com que frequência?",
-                        type: "texto"
+                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
+                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q6",
-                text: "As lixeiras e coletores estão em bom estado de conservação?",
+                text: "São gerados resíduos perigosos (ex.: pilhas, baterias, lâmpadas fluorescentes, produtos químicos, eletrônicos, óleos)?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q6_1",
-                        text: "Há lixeiras com tampa?",
+                        text: "Eles são armazenados separadamente dos resíduos comuns e em recipientes específicos?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_2",
-                        text: "As lixeiras são limpas regularmente?",
+                        text: "Existe um fornecedor/licenciado específico para a coleta e destinação final desses materiais?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_3",
-                        text: "Existem coletores para materiais recicláveis claramente identificados?",
+                        text: "Existem coletores para pilhas e baterias?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
                         id: "q6_4",
-                        text: "Há coletores específicos para resíduos perigosos?",
+                        text: "Existem coletores para lâmpadas usadas?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_5",
+                        text: "Existem coletores para óleo de cozinha usado?",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_6",
+                        text: "As lixeiras estão em número suficiente para a demanda observada?",
+                        type: "sim-nao-nao-verificado"
+                    }
+                ]
+            },
+            {
+                id: "q7",
+                        type: "sim-nao-nao-verificado"
+                    },
+                    {
+                        id: "q6_4",
+                        text: "Existem coletores para lâmpadas usadas?",
                         type: "sim-nao-nao-verificado"
                     },
                     {
@@ -1036,7 +1081,7 @@
                     {
                         id: "q7_2",
                         text: "Com que frequência os fornecedores de coleta emitem estes comprovantes?",
-                        type: "texto"
+                        type: "sim-nao-nao-verificado"
                     }
                 ]
             },
@@ -1080,23 +1125,6 @@
                 ]
             },
             {
-                id: "q11",
-                text: "Existe algum tipo de reaproveitamento ou reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
-                type: "sim-nao-nao-verificado",
-                children: [
-                    {
-                        id: "q11_1",
-                        text: "Quais materiais são reaproveitados e como?",
-                        type: "texto"
-                    },
-                    {
-                        id: "q11_2",
-                        text: "Há uma política de logística reversa para embalagens ou produtos?",
-                        type: "sim-nao-nao-verificado"
-                    }
-                ]
-            },
-            {
                 id: "q12",
                 text: "A empresa possui metas ou iniciativas para redução da geração de resíduos?",
                 type: "sim-nao-nao-verificado",
@@ -1115,6 +1143,11 @@
             },
             {
                 id: "q13",
+                text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
+                type: "sim-nao-nao-verificado"
+            },
+            {
+                id: "q14",
                 text: "Existe controle de entrada e saída de pessoas/veículos na área de armazenamento de resíduos?",
                 type: "sim-nao-nao-verificado"
             },
@@ -1149,6 +1182,10 @@
             },
             {
                 id: "q17",
+                ]
+            },
+            {
+                id: "q17",
                 text: "Existem não conformidades ou passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
                 type: "sim-nao-nao-verificado",
                 children: [
@@ -1171,12 +1208,27 @@
                     }
                 ]
             }
+                children: [
+                    {
+                        id: "q18_1",
+                        text: "Quem são esses fornecedores e para quais produtos?",
+                        type: "texto"
+                    }
+                ]
+            }
         ];
 
         // Verificar conexão com Firebase
         function checkFirebaseConnection() {
             const statusElement = document.getElementById('firebaseStatus');
             
+            if (!db) {
+                statusElement.className = 'firebase-status firebase-disconnected';
+                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Firebase não configurado - Modo offline</span>';
+                return;
+            }
+            
+            // Tentar uma operação simples para verificar conectividade
             db.collection('connection_test').doc('test')
                 .set({ timestamp: new Date() })
                 .then(() => {
@@ -1185,13 +1237,19 @@
                 })
                 .catch((error) => {
                     statusElement.className = 'firebase-status firebase-disconnected';
-                    statusElement.innerHTML = '<i class="fas fa-plug"></i> <span>Erro de conexão com Firebase</span>';
+                    statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Erro de conexão - Verifique configuração</span>';
                     console.error('Erro de conexão com Firebase:', error);
                 });
         }
 
         // Sistema de usuários com Firebase
         async function validateUser(username, password) {
+            if (!db) {
+                // Modo offline - aceitar qualquer usuário para demonstração
+                console.log('Modo offline: validação simulada');
+                return username && password;
+            }
+            
             try {
                 const userDoc = await db.collection('users').doc(username).get();
                 if (userDoc.exists) {
@@ -1201,11 +1259,18 @@
                 return false;
             } catch (error) {
                 console.error('Erro ao validar usuário:', error);
-                return false;
+                // Fallback para modo offline
+                return username && password;
             }
         }
 
         async function createUser(username, password, fullName) {
+            if (!db) {
+                // Modo offline - simular criação de usuário
+                console.log('Modo offline: criação de usuário simulada');
+                return { success: true, message: 'Usuário criado com sucesso (modo offline)!' };
+            }
+            
             try {
                 // Verificar se usuário já existe
                 const userDoc = await db.collection('users').doc(username).get();
@@ -1241,6 +1306,11 @@
         }
 
         async function getUserFullName(username) {
+            if (!db) {
+                // Modo offline - retornar nome do usuário
+                return username;
+            }
+            
             try {
                 const userDoc = await db.collection('users').doc(username).get();
                 if (userDoc.exists) {
@@ -1387,46 +1457,39 @@
             return data;
         }
 
-        // Função para salvar dados no Firebase
-        async function saveFormData() {
+        // Função para salvar dados do formulário no Firestore
+        async function saveFormDataToFirestore(unit, formData) {
             try {
-                const unit = document.getElementById('unidade').value;
-                if (!unit) {
-                    alert('Por favor, selecione uma unidade antes de salvar.');
-                    return;
-                }
-
-                const data = collectFormData();
                 const docId = `${currentUser}_${unit}`;
-
-                // Salvar dados do formulário
                 await db.collection('visitas_tecnicas').doc(docId).set({
                     user: currentUser,
                     unit: unit,
-                    data: data,
-                    timestamp: new Date().toISOString()
+                    data: formData,
+                    lastUpdated: new Date().toISOString()
                 });
-
-                // Salvar imagens
-                await saveImages(unit);
-
-                alert('Dados salvos com sucesso!');
+                return true;
             } catch (error) {
-                console.error('Erro ao salvar dados:', error);
-                alert('Erro ao salvar dados. Tente novamente.');
+                console.error('Erro ao salvar dados no Firestore:', error);
+                return false;
             }
         }
 
-        // Função para salvar imagens no Firebase Storage
-        async function saveImages(unit) {
-            const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
-            const imageUrls = {};
+        // Função para fazer upload das imagens para o Storage
+        async function uploadImagesToStorage(unit) {
+            const imageUrls = {
+                fachada: [],
+                'coletores-internos': [],
+                'coletores-externos': [],
+                problemas: [],
+                outras: []
+            };
 
+            const categories = ['fachada', 'coletores-internos', 'coletores-externos', 'problemas', 'outras'];
+            
             for (const category of categories) {
                 const previewContainer = document.getElementById(`preview-${category}`);
                 const images = previewContainer.querySelectorAll('img');
-                imageUrls[category] = [];
-
+                
                 for (let i = 0; i < images.length; i++) {
                     const img = images[i];
                     const canvas = document.createElement('canvas');
@@ -1437,28 +1500,44 @@
                     ctx.drawImage(img, 0, 0);
                     
                     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-                    const fileName = `${currentUser}/${unit}/${category}_${i + 1}_${Date.now()}.jpg`;
+                    
+                    const fileName = `${currentUser}/${unit}/${category}/${Date.now()}_${i}.jpg`;
                     const storageRef = storage.ref().child(fileName);
                     
-                    await storageRef.put(blob);
-                    const downloadURL = await storageRef.getDownloadURL();
-                    imageUrls[category].push(downloadURL);
+                    try {
+                        const snapshot = await storageRef.put(blob);
+                        const downloadURL = await snapshot.ref.getDownloadURL();
+                        imageUrls[category].push(downloadURL);
+                    } catch (error) {
+                        console.error('Erro ao fazer upload da imagem:', error);
+                    }
                 }
             }
 
-            // Salvar URLs das imagens no Firestore
-            const docId = `${currentUser}_${unit}`;
-            await db.collection('visitas_imagens').doc(docId).set({
-                user: currentUser,
-                unit: unit,
-                images: imageUrls,
-                timestamp: new Date().toISOString()
-            });
+            return imageUrls;
+        }
+
+        // Função para salvar URLs das imagens no Firestore
+        async function saveImageUrlsToFirestore(unit, imageUrls) {
+            try {
+                const docId = `${currentUser}_${unit}`;
+                await db.collection('visitas_imagens').doc(docId).set({
+                    user: currentUser,
+                    unit: unit,
+                    images: imageUrls,
+                    lastUpdated: new Date().toISOString()
+                });
+                return true;
+            } catch (error) {
+                console.error('Erro ao salvar URLs das imagens:', error);
+                return false;
+            }
         }
 
         // Função para carregar dados salvos
         async function loadSavedData(unit) {
             try {
+                // Carregar dados do formulário
                 const docId = `${currentUser}_${unit}`;
                 const doc = await db.collection('visitas_tecnicas').doc(docId).get();
                 
@@ -1466,7 +1545,6 @@
                     const savedData = doc.data().data;
                     
                     // Preencher campos básicos
-                    document.getElementById('unidade').value = savedData.unidade || '';
                     document.getElementById('data').value = savedData.data || '';
                     document.getElementById('acompanhante').value = savedData.acompanhante || '';
                     document.getElementById('tecnico').value = savedData.tecnico || '';
@@ -1502,7 +1580,7 @@
                             question.children.forEach(child => {
                                 if (savedData[child.id]) {
                                     const childElement = document.querySelector(`input[name="${child.id}"][value="${savedData[child.id]}"]`) ||
-                                                        document.querySelector(`input[name="${child.id}"]`);
+                                                       document.querySelector(`input[name="${child.id}"]`);
                                     if (childElement) {
                                         if (childElement.type === 'radio') {
                                             childElement.checked = true;
@@ -1851,14 +1929,21 @@
                 
                 try {
                     const result = await createUser(username, password, fullName);
+                    
                     if (result.success) {
                         successDiv.textContent = result.message;
                         successDiv.style.display = 'block';
-                        // Limpar campos
+                        
+                        // Limpar formulário
                         document.getElementById('newUsername').value = '';
                         document.getElementById('newPassword').value = '';
                         document.getElementById('confirmPassword').value = '';
                         document.getElementById('fullName').value = '';
+                        
+                        // Voltar para login após 2 segundos
+                        setTimeout(() => {
+                            showLogin();
+                        }, 2000);
                     } else {
                         errorDiv.textContent = result.message;
                         errorDiv.style.display = 'block';
@@ -1875,26 +1960,31 @@
             });
             
             // Event listeners para alternar entre login e registro
-            document.getElementById('showRegister').addEventListener('click', showRegisterForm);
-            document.getElementById('showLogin').addEventListener('click', showLoginForm);
+            document.getElementById('showRegister').addEventListener('click', function() {
+                showRegister();
+            });
+            
+            document.getElementById('showLogin').addEventListener('click', function() {
+                showLogin();
+            });
             
             // Event listener para logout
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 currentUser = '';
-                showLoginForm();
+                formData = {};
+                photoData = {};
+                showLogin();
             });
             
-            // Event listener para seleção de unidade
+            // Event listener para mudança de unidade
             document.getElementById('unidade').addEventListener('change', function() {
                 const selectedUnit = this.value;
-                if (selectedUnit && currentUser) {
+                if (selectedUnit) {
                     loadSavedData(selectedUnit);
                 }
             });
             
-            // Event listeners para botões principais
-            document.getElementById('saveBtn').addEventListener('click', saveFormData);
-            document.getElementById('resetBtn').addEventListener('click', clearForm);
+            // Event listener para botão de fotos
             document.getElementById('photoBtn').addEventListener('click', function() {
                 const photoSection = document.getElementById('photoSection');
                 if (photoSection.style.display === 'none' || photoSection.style.display === '') {
@@ -1905,10 +1995,8 @@
                     this.innerHTML = '<i class="fas fa-camera"></i> Fotos';
                 }
             });
-            document.getElementById('exportBtn').addEventListener('click', exportToXLSX);
-            document.getElementById('exportImagesBtn').addEventListener('click', exportImagesToZip);
             
-            // Event listeners para inputs de foto
+            // Event listeners para inputs de foto (múltiplas fotos)
             const photoInputs = document.querySelectorAll('.photo-input');
             photoInputs.forEach(input => {
                 input.addEventListener('change', function() {
@@ -1917,20 +2005,81 @@
                     handleMultiplePhotos(this, previewContainer);
                 });
             });
+            
+            // Botão de salvar
+            document.getElementById('saveBtn').addEventListener('click', async function() {
+                if (!document.getElementById('unidade').value || !document.getElementById('data').value || !document.getElementById('tecnico').value) {
+                    alert('Por favor, preencha pelo menos a unidade, data da visita e nome do técnico.');
+                    return;
+                }
+
+                try {
+                    // Mostrar indicador de progresso
+                    const saveBtn = document.getElementById('saveBtn');
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                    saveBtn.disabled = true;
+
+                    // Salvar dados do formulário
+                    const unit = document.getElementById('unidade').value;
+                    const formData = collectFormData();
+                    
+                    // Salvar no Firestore
+                    const formSaved = await saveFormDataToFirestore(unit, formData);
+                    
+                    if (formSaved) {
+                        // Fazer upload das imagens
+                        const imageUrls = await uploadImagesToStorage(unit);
+                        
+                        // Salvar URLs das imagens no Firestore
+                        await saveImageUrlsToFirestore(unit, imageUrls);
+                        
+                        alert('Dados salvos com sucesso para a unidade ' + unit);
+                    } else {
+                        alert('Erro ao salvar os dados. Verifique o console para mais detalhes.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro ao salvar os dados. Tente novamente.');
+                } finally {
+                    // Restaurar botão
+                    const saveBtn = document.getElementById('saveBtn');
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                }
+            });
+            
+            // Botão de limpar
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja limpar o formulário? Todos os dados não salvos serão perdidos.')) {
+                    clearForm();
+                }
+            });
+            
+            // Botão de exportar XLSX
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                exportToXLSX();
+            });
+            
+            // Botão de exportar imagens ZIP
+            document.getElementById('exportImagesBtn').addEventListener('click', function() {
+                exportImagesToZip();
+            });
         });
 
-        // Função para mostrar a tela de login
-        function showLoginForm() {
+        // Funções de navegação entre telas
+        function showLogin() {
             document.getElementById('loginContainer').style.display = 'flex';
             document.getElementById('registerContainer').style.display = 'none';
             document.getElementById('mainContent').style.display = 'none';
             
-            // Limpar mensagens
+            // Limpar campos
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
             document.getElementById('loginError').style.display = 'none';
         }
-
-        // Função para mostrar a tela de registro
-        function showRegisterForm() {
+        
+        function showRegister() {
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('registerContainer').style.display = 'flex';
             document.getElementById('mainContent').style.display = 'none';
@@ -2034,4 +2183,3 @@
     </script>
 </body>
 </html>
-
