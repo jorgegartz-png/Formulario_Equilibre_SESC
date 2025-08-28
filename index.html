@@ -682,7 +682,7 @@
                     <label for="password">Senha</label>
                     <input type="password" id="password" placeholder="Digite sua senha">
                 </div>
-                <div class="error-message" id="loginError">Usuário ou senha incorretos!</div>
+                <div class="error-message" id="loginError">Usuário or senha incorretos!</div>
                 <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Entrar</button>
                 <div class="auth-switch" id="showRegister">Não tem conta? Criar nova conta</div>
             </div>
@@ -872,12 +872,12 @@
     <script>
         // CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELAS SUAS CREDENCIAIS
         const firebaseConfig = {
-            apiKey: "AIzaSyC2SZV0zeeFg5gv0uvYHrGiPIUYeN8IEH0",
-            authDomain: "equilibre-ambiental.firebaseapp.com",
-            projectId: "equilibre-ambiental",
-            storageBucket: "equilibre-ambiental.appspot.com",
-            messagingSenderId: "951726089505",
-            appId: "1:951726089505:web:fa7ae08e48a9c2e5324a60"
+            apiKey: "AIzaSyAyYleLNapoDWhcLxw-5ZtESNNwVaKlnMA",
+            authDomain: "minhas-finan-70d3c.firebaseapp.com",
+            projectId: "minhas-finan-70d3c",
+            storageBucket: "minhas-finan-70d3c.appspot.com",
+            messagingSenderId: "1097470306912",
+            appId: "1:1097470306912:web:9f792d01a443f1fae1b105"
         };
 
         // Inicializar Firebase
@@ -938,7 +938,7 @@
                     },
                     {
                         id: "q3_2",
-                        text: "A coleta é realizada por empresa terceirizada ou pela prefeitura?",
+                        text: "A coleta é realizada por empresa terceirizada or pela prefeitura?",
                         type: "texto"
                     }
                 ]
@@ -967,7 +967,7 @@
                     },
                     {
                         id: "q5_2",
-                        text: "Existe interesse ou viabilidade para implementação de compostagem?",
+                        text: "Existe interesse or viabilidade para implementação de compostagem?",
                         type: "sim-nao-nao-verificado"
                     }
                 ]
@@ -1050,7 +1050,7 @@
             },
             {
                 id: "q10",
-                text: "Os colaboradores receberam treinamento ou orientação sobre a segregação correta dos resíduos?",
+                text: "Os colaboradores receberam treinamento or orientação sobre a segregação correta dos resíduos?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
@@ -1067,7 +1067,7 @@
             },
             {
                 id: "q11",
-                text: "Existe algum tipo de reaproveitamento ou reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
+                text: "Existe algum tipo de reaproveitamento or reutilização de resíduos dentro da unidade? (ex.: uso de rascunhos, doação de materiais)",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
@@ -1077,19 +1077,19 @@
                     },
                     {
                         id: "q11_2",
-                        text: "Há uma política de logística reversa para embalagens ou produtos?",
+                        text: "Há uma política de logística reversa para embalagens or produtos?",
                         type: "sim-nao-nao-verificado"
                     }
                 ]
             },
             {
                 id: "q12",
-                text: "A empresa possui metas ou iniciativas para redução da geração de resíduos?",
+                text: "A empresa possui metas or iniciativas para redução da geração de resíduos?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
                         id: "q12_1",
-                        text: "Quais são essas metas ou iniciativas? (ex.: campanhas de conscientização, eliminação de copos descartáveis)",
+                        text: "Quais são essas metas or iniciativas? (ex.: campanhas de conscientização, eliminação de copos descartáveis)",
                         type: "texto"
                     },
                     {
@@ -1135,7 +1135,7 @@
             },
             {
                 id: "q17",
-                text: "Existem não conformidades ou passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
+                text: "Existem não conformidades or passivos ambientais históricos relacionados a resíduos? (ex.: área de disposição inadequada no passado)",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
@@ -1147,7 +1147,7 @@
             },
             {
                 id: "q18",
-                text: "A empresa possui fornecedores preferenciais que adotam práticas sustentáveis ou de logística reversa?",
+                text: "A empresa possui fornecedores preferenciais que adotam práticas sustentáveis or de logística reversa?",
                 type: "sim-nao-nao-verificado",
                 children: [
                     {
@@ -1415,12 +1415,12 @@
                     canvas.height = img.naturalHeight;
                     ctx.drawImage(img, 0, 0);
                     
-                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-                    
-                    const fileName = `${currentUser}/${unit}/${category}/${Date.now()}_${i}.jpg`;
-                    const storageRef = storage.ref().child(fileName);
-                    
                     try {
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+                        
+                        const fileName = `${currentUser}/${unit}/${category}/${Date.now()}_${i}.jpg`;
+                        const storageRef = storage.ref().child(fileName);
+                        
                         const snapshot = await storageRef.put(blob);
                         const downloadURL = await snapshot.ref.getDownloadURL();
                         imageUrls[category].push(downloadURL);
@@ -1875,7 +1875,7 @@
                 }
             });
             
-            // Event listeners para alternar entre login e registro
+            // Event listeners para alternar entre login and registro
             document.getElementById('showRegister').addEventListener('click', function() {
                 showRegister();
             });
@@ -1922,20 +1922,19 @@
                 });
             });
             
-            // Botão de salvar
+            // Botão de salvar - CORRIGIDO
             document.getElementById('saveBtn').addEventListener('click', async function() {
                 if (!document.getElementById('unidade').value || !document.getElementById('data').value || !document.getElementById('tecnico').value) {
                     alert('Por favor, preencha pelo menos a unidade, data da visita e nome do técnico.');
                     return;
                 }
 
-                try {
-                    // Mostrar indicador de progresso
-                    const saveBtn = document.getElementById('saveBtn');
-                    const originalText = saveBtn.innerHTML;
-                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                    saveBtn.disabled = true;
+                const saveBtn = document.getElementById('saveBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                saveBtn.disabled = true;
 
+                try {
                     // Salvar dados do formulário
                     const unit = document.getElementById('unidade').value;
                     const formData = collectFormData();
@@ -1943,23 +1942,26 @@
                     // Salvar no Firestore
                     const formSaved = await saveFormDataToFirestore(unit, formData);
                     
-                    if (formSaved) {
-                        // Fazer upload das imagens
-                        const imageUrls = await uploadImagesToStorage(unit);
-                        
-                        // Salvar URLs das imagens no Firestore
-                        await saveImageUrlsToFirestore(unit, imageUrls);
-                        
-                        alert('Dados salvos com sucesso para a unidade ' + unit);
-                    } else {
-                        alert('Erro ao salvar os dados. Verifique o console para mais detalhes.');
+                    if (!formSaved) {
+                        throw new Error('Falha ao salvar dados do formulário');
                     }
+                    
+                    // Fazer upload das imagens
+                    const imageUrls = await uploadImagesToStorage(unit);
+                    
+                    // Salvar URLs das imagens no Firestore
+                    const imagesSaved = await saveImageUrlsToFirestore(unit, imageUrls);
+                    
+                    if (!imagesSaved) {
+                        throw new Error('Falha ao salvar URLs das imagens');
+                    }
+                    
+                    alert('Dados salvos com sucesso para a unidade ' + unit);
                 } catch (error) {
                     console.error('Erro ao salvar:', error);
-                    alert('Erro ao salvar os dados. Tente novamente.');
+                    alert('Erro ao salvar os dados: ' + error.message);
                 } finally {
-                    // Restaurar botão
-                    const saveBtn = document.getElementById('saveBtn');
+                    // Restaurar botão independentemente do resultado
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
                 }
@@ -2021,7 +2023,7 @@
             const questionsContainer = document.getElementById('questions-container');
             questionsContainer.innerHTML = '';
             
-            questions.forEach((question, index) => {
+            questions.forEach((question, index) {
                 const questionElement = document.createElement('div');
                 questionElement.className = 'question';
                 questionElement.innerHTML = `
